@@ -1,0 +1,27 @@
+Dataset packaging summary
+=========================
+Source root          : C:\SIH
+Files collected      : 20054
+Unique files stored  : 20025
+Duplicate refs skipped: 29
+Total stored bytes   : 1,742,134,274 (1742.1 MB)
+Parts                : 18
+  part-001: 3376 files, 99,994,015 bytes
+  part-002: 1227 files, 99,982,766 bytes
+  part-003: 736 files, 99,907,959 bytes
+  part-004: 746 files, 99,985,965 bytes
+  part-005: 826 files, 99,973,456 bytes
+  part-006: 689 files, 99,887,351 bytes
+  part-007: 968 files, 99,943,000 bytes
+  part-008: 1109 files, 99,801,176 bytes
+  part-009: 1074 files, 99,952,424 bytes
+  part-010: 1207 files, 99,967,362 bytes
+  part-011: 1041 files, 99,873,726 bytes
+  part-012: 1068 files, 99,900,429 bytes
+  part-013: 1033 files, 99,992,383 bytes
+  part-014: 1362 files, 99,908,146 bytes
+  part-015: 1024 files, 99,920,612 bytes
+  part-016: 1001 files, 99,939,716 bytes
+  part-017: 1092 files, 99,950,113 bytes
+  part-018: 446 files, 43,253,675 bytes
+Excluded by policy   : *.zip archives (bit-identical to extracted folders, CRC-32 verified), oversize files, ignored dirs/exts
