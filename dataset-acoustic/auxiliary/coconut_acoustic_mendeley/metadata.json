@@ -1,0 +1,49 @@
+{
+  "dataset_type": "related_produce_acoustic",
+  "dataset_name": "Acoustic Signal Dataset: Tall Coconut Fruit Species",
+  "source_name": "Mendeley Data (Caladcad et al. 2023)",
+  "source_url": "https://data.mendeley.com/datasets/hxh8kd3snj/1",
+  "paper_doi": "10.1016/j.dib.2023.108936",
+  "related_paper_doi": "10.1016/j.compag.2020.105327",
+  "repository_doi": "10.17632/hxh8kd3snj.1",
+  "license": "CC BY-NC-ND 4.0",
+  "download_date": "2026-09-18",
+  "download_script": "tools/download_external_acoustic_data.py",
+  "file_count": 1,
+  "total_bytes": 278424725,
+  "audio_formats": ["xlsx-embedded-signals (16-bit PCM 44.1 kHz, 132,300 samples per signal)"],
+  "sample_rate_hz": 44100,
+  "channels": 1,
+  "labels": {
+    "scheme": "maturity level codes in file names / sheet split: im (premature, 8 coconuts), m (mature, 36), om (overmature, 85)",
+    "ground_truth_method": "expert pre-classification by local farmers and experts",
+    "is_onion_specific": false
+  },
+  "capture_method": "mechanical knocking arm + ATR2500 USB condenser microphone, acoustic-foam enclosure",
+  "redistribution_allowed": false,
+  "redistribution_blockers": [
+    "CC BY-NC-ND: NoDerivatives — repackaging into GitHub parts is a prohibited derivative",
+    "single-file size 278,424,725 bytes exceeds the 100,000,000-byte GitHub limit"
+  ],
+  "known_limitations": [
+    "Not onions: coconut maturity, not onion internal defect",
+    "NoDerivatives license forbids redistribution of a repacked copy",
+    "Signals embedded in XLSX; no standalone WAVs shipped",
+    "Class imbalance: 8 / 36 / 85 coconuts across maturity levels"
+  ],
+  "permitted_local_uses": [
+    "Pipeline testing and DSP benchmarking locally (NonCommercial)",
+    "Methodological reference for collection protocol design"
+  ],
+  "not_permitted": [
+    "Training or evaluating any model presented as an onion internal-defect classifier",
+    "Redistribution via GitHub or any public mirror"
+  ],
+  "sha256_of_download": "629fbc02a8ffac1a40222a2c6a536a1e4a51e812fe9defaaed93417e6c151971",
+  "provenance": {
+    "authors": "J.A. Caladcad, E.J. Piedad, S. Cabahug, M.R. Catamco, P.E. Villaceran, L. Cosgafa, K.N. Cabizares, M. Hermosilla",
+    "sample_description": "129 tall-variety coconuts, 3 taps per coconut (Ridge A/B/C), 387 acoustic signals, Argao, Philippines",
+    "data_brief_pmcid": "PMC9926183",
+    "data_source_location": "Argao, Philippines; recorded at University of San Jose-Recoletos, Cebu"
+  }
+}

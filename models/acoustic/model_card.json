@@ -1,0 +1,35 @@
+{
+  "metrics": {
+    "random_forest": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "confusion_matrix": [
+        [
+          2,
+          0
+        ],
+        [
+          0,
+          3
+        ]
+      ],
+      "n_train": 11,
+      "n_test": 5
+    },
+    "logistic_regression": {
+      "accuracy": 1.0,
+      "f1": 1.0
+    }
+  },
+  "metadata": {
+    "trained_date": "2026-09-18",
+    "dataset_type": [
+      "synthetic"
+    ],
+    "n_files": 16,
+    "data_root": "dataset-acoustic\\synthetic\\demo_chirp_responses",
+    "warning": "SYNTHETIC DEMO MODEL: trained only on oscillator-generated audio. NOT an onion internal-defect classifier. Not clinically or industrially validated."
+  }
+}

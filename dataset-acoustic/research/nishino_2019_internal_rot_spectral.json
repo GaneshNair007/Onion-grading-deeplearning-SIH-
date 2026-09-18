@@ -1,0 +1,17 @@
+{
+  "paper_title": "Dual-beam spectral measurement improves accuracy of internal rot detection in onion bulbs",
+  "authors": ["M. Nishino", "et al."],
+  "journal": "Postharvest Biology and Technology",
+  "year": 2019,
+  "doi": null,
+  "urls": {
+    "publisher": "https://www.sciencedirect.com/science/article/abs/pii/S0925521419302613"
+  },
+  "dataset_type": "paper_only",
+  "is_onion_specific": true,
+  "modality": "visible/NIR spectroscopy - NOT acoustic",
+  "data_publicly_available": false,
+  "relevance": "Onion internal rot detection via dual-beam spectral measurement with PLSR modelling; demonstrates that internal rot produces measurable physical signatures, and documents reported rot-detection accuracy levels in the literature.",
+  "license": "(c) Elsevier - paywalled; data not found publicly",
+  "metadata_recorded_date": "2026-09-18"
+}

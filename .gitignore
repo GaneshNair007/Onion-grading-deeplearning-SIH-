@@ -22,12 +22,16 @@ outputs/
 logs/
 checkpoints/
 
-# ---- Model weights ----
+# ---- Model weights / trained artifacts ----
 *.pt
 *.pth
 *.onnx
 *.h5
 *.tflite
+*.joblib
+
+# ---- Test / tooling caches ----
+.pytest_cache/
 
 # ---- OS junk ----
 .DS_Store

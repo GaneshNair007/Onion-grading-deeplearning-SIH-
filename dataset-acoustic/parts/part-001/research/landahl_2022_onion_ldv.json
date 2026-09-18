@@ -1,0 +1,32 @@
+{
+  "paper_title": "Detection of internal defects in onion bulbs by means of single-point and scanning laser Doppler vibrometry",
+  "authors": ["S. Landahl", "et al."],
+  "affiliation": "Cranfield University (institutional repository listing)",
+  "journal": "Biosystems Engineering",
+  "volume": 221,
+  "pages": "258-273",
+  "year": 2022,
+  "month": "September",
+  "doi": "10.1016/j.biosystemseng.2022.07.004",
+  "urls": {
+    "publisher": "https://www.sciencedirect.com/science/article/pii/S1537511022001660",
+    "institutional_repository": "https://dspace.lib.cranfield.ac.uk/items/8eb70c8d-bbe8-4fc7-bfe7-045062e2b9e2"
+  },
+  "dataset_type": "paper_only",
+  "is_onion_specific": true,
+  "data_publicly_available": false,
+  "key_findings_relevant_to_project": [
+    "Laser Doppler vibrometry (LDV) can non-destructively identify internal defects, including neck rot, in onion bulbs.",
+    "Single-point and scanning LDV measurements of bulb vibration response differ between defective and sound bulbs.",
+    "The authors emphasize controlled acquisition and cultivar-aware validation - internal-defect signatures must be validated per cultivar, not assumed universal."
+  ],
+  "how_this_project_uses_it": [
+    "Design of dataset-acoustic/collection_protocol.md: controlled excitation, fixed geometry, per-onion IDs, repeatability checks.",
+    "Justification for onion-level (cultivar-aware) validation splits.",
+    "It is NOT used as evidence that a phone speaker/microphone system detects onion internal rot - the paper uses laboratory LDV hardware."
+  ],
+  "license": "(c) Elsevier - subscription article; no public dataset located",
+  "full_text_access": "not confirmed; paywalled at publisher",
+  "metadata_recorded_date": "2026-09-18",
+  "notes": "Recorded as a research reference per project rules. No audio or vibration data from this paper is included or used as training data anywhere in this repository."
+}

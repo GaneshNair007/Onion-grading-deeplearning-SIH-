@@ -1,0 +1,18 @@
+{
+  "paper_title": "Novel non-destructive quality assessment techniques of onion: A review",
+  "authors": ["M.N. Islam", "et al."],
+  "journal": "PMC (open access review)",
+  "pmcid": "PMC6045999",
+  "year": 2018,
+  "doi": null,
+  "urls": {
+    "publisher": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6045999/"
+  },
+  "dataset_type": "paper_only",
+  "is_onion_specific": true,
+  "modality": "review of non-destructive quality assessment methods",
+  "data_publicly_available": false,
+  "relevance": "Surveys non-destructive onion quality techniques (imaging, spectral, acoustic-adjacent), providing context for the choice of vibrometry/acoustic research directions and their maturity levels.",
+  "license": "open access (PMC)",
+  "metadata_recorded_date": "2026-09-18"
+}

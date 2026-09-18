@@ -1,0 +1,20 @@
+{
+  "paper_title": "Preliminary Studies on Detection of Fusarium Basal Rot in Onion and Shallot Using an Electronic Nose",
+  "authors": ["M. Labanska", "et al."],
+  "journal": "Sensors",
+  "volume": 22,
+  "issue": 14,
+  "article_number": 5453,
+  "year": 2022,
+  "doi": null,
+  "urls": {
+    "publisher": "https://www.mdpi.com/1424-8220/22/14/5453"
+  },
+  "dataset_type": "paper_only",
+  "is_onion_specific": true,
+  "modality": "electronic nose (volatile sensing) - NOT acoustic",
+  "data_publicly_available": false,
+  "relevance": "Documents onion-specific post-harvest fungal/internal-rot sensing literature outside the acoustic domain; included to show breadth of onion internal-defect sensing research.",
+  "license": "open access article (MDPI); underlying data availability not established",
+  "metadata_recorded_date": "2026-09-18"
+}

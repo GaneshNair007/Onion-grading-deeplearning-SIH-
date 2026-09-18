@@ -1,0 +1,124 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Onion acoustic recording metadata",
+  "description": "Per-recording metadata for dataset-acoustic. One JSON file per recording. Fields mirror the project-wide contract; unknown values must be empty strings or null, never guessed.",
+  "type": "object",
+  "required": [
+    "recording_id",
+    "onion_id",
+    "dataset_type",
+    "audio_path"
+  ],
+  "properties": {
+    "recording_id": {
+      "type": "string",
+      "pattern": "^AUDIO_[0-9]{6}$",
+      "examples": ["AUDIO_000001"]
+    },
+    "onion_id": {
+      "type": "string",
+      "pattern": "^ONION_[0-9]{6}$",
+      "description": "Groups recordings from the same physical onion; dataset splits are made at onion level, never at recording level.",
+      "examples": ["ONION_000001"]
+    },
+    "dataset_type": {
+      "type": "string",
+      "enum": [
+        "verified_onion_acoustic",
+        "related_produce_acoustic",
+        "generic_audio_pretraining",
+        "paper_only",
+        "synthetic"
+      ]
+    },
+    "source_name": { "type": "string" },
+    "source_url": { "type": "string" },
+    "paper_doi": { "type": "string" },
+    "license": { "type": "string" },
+    "audio_path": {
+      "type": "string",
+      "description": "Repository-relative path of the audio file this metadata describes."
+    },
+    "format": {
+      "type": "string",
+      "enum": ["wav", "flac", "mp3", "m4a", "other"],
+      "default": "wav"
+    },
+    "sample_rate_hz": {
+      "type": "integer",
+      "minimum": 8000,
+      "maximum": 192000,
+      "default": 48000
+    },
+    "channels": {
+      "type": "integer",
+      "enum": [1, 2],
+      "default": 1
+    },
+    "duration_seconds": {
+      "type": "number",
+      "minimum": 0,
+      "examples": [1.5]
+    },
+    "capture_method": {
+      "type": "string",
+      "enum": [
+        "phone_chirp",
+        "phone_tap",
+        "impact_hammer",
+        "vibrometry",
+        "unknown"
+      ]
+    },
+    "device": {
+      "type": "string",
+      "description": "Recording device identifier, e.g. 'Samsung Galaxy A54' or 'ATR2500 USB mic'. Never leave 'unknown' for newly collected data."
+    },
+    "position": {
+      "type": "string",
+      "enum": ["neck", "equator", "base", "unknown"]
+    },
+    "variety": {
+      "type": "string",
+      "description": "Onion cultivar if known; empty string otherwise. Cultivar-aware validation is required by Landahl et al. 2022."
+    },
+    "external_label": {
+      "type": "string",
+      "description": "Visible-condition label (e.g. sound, damaged, rotten, sprouted, undersized). Empty if not assessed."
+    },
+    "internal_label": {
+      "type": "string",
+      "description": "Internal-condition ground truth (e.g. firm, early_rot, hollow, rotten). MUST come from ground_truth_method below — never inferred from filenames or acoustics."
+    },
+    "ground_truth_method": {
+      "type": "string",
+      "enum": ["cut_open", "expert_inspection", "paper_label", "unknown"],
+      "default": "unknown"
+    },
+    "split": {
+      "type": "string",
+      "enum": ["train", "validation", "test", "not_applicable"],
+      "default": "not_applicable",
+      "description": "Assigned by the split tool at onion_id granularity; never hand-edited per recording."
+    },
+    "redistribution_allowed": {
+      "type": "boolean",
+      "default": true
+    },
+    "capture_metadata": {
+      "type": "object",
+      "description": "Phone-only capture provenance; required for phone_chirp / phone_tap recordings.",
+      "properties": {
+        "device_model": { "type": "string" },
+        "os_version": { "type": "string" },
+        "recording_app": { "type": "string" },
+        "recorded_volume_setting": { "type": ["string", "null"] },
+        "ambient_noise_score": { "type": ["number", "null"] },
+        "distance_cm": { "type": ["number", "null"] },
+        "onion_contact_with_phone": { "type": ["boolean", "null"] },
+        "recorded_at": { "type": "string" }
+      }
+    },
+    "notes": { "type": "string" }
+  }
+}
