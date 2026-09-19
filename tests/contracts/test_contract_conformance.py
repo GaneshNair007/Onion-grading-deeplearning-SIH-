@@ -79,7 +79,8 @@ def test_acoustic_inference_output_satisfies_the_acoustic_contract(tmp_path):
     result = classify_acoustic(str(path))
     contract = result and __import__(
         "src.common.contracts", fromlist=["AcousticResult"]).AcousticResult.from_dict(result)
-    assert contract.status in {"valid", "retest_required", "model_not_trained"}
+    assert contract.status in {"valid", "retest_required",
+                               "model_not_trained", "no_impact_detected"}
     # The whole point of the flag: synthetic audio is never eligible.
     if "synthetic" in contract.dataset_types:
         assert contract.research_only is True

@@ -122,22 +122,40 @@ def check_impact_present(signal: np.ndarray, sr: int,
 
 
 def _fast_decay_rate(sig: np.ndarray, sr: int, peak_index: int) -> float:
-    """Estimate the envelope decay rate (1/s) in the 200 ms after the peak."""
-    win = int(0.2 * sr)
+    """Estimate the envelope decay rate (1/s) after the peak.
+
+    Fits a line to log(envelope) over the WHOLE post-peak segment (capped
+    at 2 s) and returns its negative slope. A free-decaying impact decays
+    systematically, so the long-window slope is clearly positive; noise
+    swells fluctuate, so their ups and downs cancel over the long window
+    and the slope is ~0. A recording only counts as decaying when BOTH
+    the fitted slope is positive AND the envelope systematically decreases
+    (late-window mean below half the early-window mean)."""
+    win = int(2.0 * sr)
     seg = sig[peak_index:peak_index + win]
     if seg.size < sr // 10:  # need at least 100 ms
         return 0.0
     frame = max(sr // 200, 32)  # 5 ms frames
-    env = [float(np.sqrt(np.mean(seg[i:i + frame] ** 2)))
-           for i in range(0, seg.size - frame, frame)]
-    if len(env) < 4:
+    env = np.asarray([np.sqrt(np.mean(seg[i:i + frame] ** 2))
+                      for i in range(0, seg.size - frame, frame)])
+    if env.size < 4:
         return 0.0
-    peak_env = max(env[0], 1e-12)
-    # Time for the envelope to fall to 20% of its initial value.
-    threshold = 0.2 * peak_env
-    for idx, value in enumerate(env):
-        if value <= threshold:
-            return float(-np.log(max(value, 1e-12) / peak_env) /
-                         max(idx * (frame / sr), 1e-6))
-    # Did not fall to 20% within the window -> slow/no decay.
-    return 0.0
+    peak_env = float(env.max())
+    if peak_env < 1e-9:
+        return 0.0
+    keep = env > max(0.01 * peak_env, 1e-9)  # avoid log of ~zero
+    if keep.sum() < 4:
+        return 0.0
+    t = np.arange(env.size, dtype=np.float64) * (frame / sr)
+    slope = float(np.polyfit(t[keep], np.log(env[keep]), 1)[0])
+    rate = max(-slope, 0.0)
+
+    # Systematic decrease required: late envelope must fall well below the
+    # early envelope. Fluctuating noise fails this even if a local slope
+    # looks like a decay.
+    n10 = max(env.size // 10, 1)
+    early = float(np.mean(env[:n10]))
+    late = float(np.mean(env[-max(env.size // 5, 1):]))
+    if late >= 0.5 * max(early, 1e-12):
+        return 0.0
+    return rate
