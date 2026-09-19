@@ -1,0 +1,170 @@
+{
+  "kind": "composed_tray_fixture",
+  "composed_fixture": true,
+  "statement": "Onion pixels come from real dataset photographs; the background, grid and layout are synthetic. This is a TEST FIXTURE, not a real field tray photograph, and reports derived from it are labelled as composed fixtures.",
+  "composed_at": null,
+  "seed": 11,
+  "canvas_px": [
+    1200,
+    900
+  ],
+  "background_grid_px_per_step": 60,
+  "calibration": {
+    "markers_drawn": true,
+    "marker_size_mm": 40.0,
+    "marker_px": 160,
+    "declared_px_per_mm": 4.0,
+    "marker_placements": [
+      {
+        "marker_id": 0,
+        "bbox_xywh": [
+          96,
+          96,
+          160,
+          160
+        ]
+      },
+      {
+        "marker_id": 1,
+        "bbox_xywh": [
+          944,
+          644,
+          160,
+          160
+        ]
+      }
+    ],
+    "critical_note": "The px/mm scale is the FIXTURE's scale. Sizes measured on this montage are NOT the photographed onions' real physical sizes, which are unknown because each crop came from a different unknown camera distance."
+  },
+  "onions_placed": 9,
+  "onion_placements": [
+    {
+      "dataset_image": "dataset\\part-001\\onion-coco-mmdetection\\train\\img_va1_png_jpg.rf.4264e48059841f8522fe01b9d397b1e0.jpg",
+      "source_group": null,
+      "sha256_of_source": null,
+      "bbox_xywh_in_montage": [
+        26,
+        45,
+        222,
+        222
+      ],
+      "source_categories": [
+        "sprout"
+      ]
+    },
+    {
+      "dataset_image": "dataset\\part-001\\onion-coco-mmdetection\\train\\img_tr104_jpg.rf.b3b3efaf0996588759abb7fb677ebac3.jpg",
+      "source_group": null,
+      "sha256_of_source": null,
+      "bbox_xywh_in_montage": [
+        352,
+        63,
+        195,
+        195
+      ],
+      "source_categories": [
+        "rotten"
+      ]
+    },
+    {
+      "dataset_image": "dataset\\part-001\\onion-coco-mmdetection\\train\\img_tr193_jpg.rf.089f5258996f15855067dab42168f7ed.jpg",
+      "source_group": null,
+      "sha256_of_source": null,
+      "bbox_xywh_in_montage": [
+        634,
+        23,
+        228,
+        228
+      ],
+      "source_categories": [
+        "rotten"
+      ]
+    },
+    {
+      "dataset_image": "dataset\\part-001\\onion-coco-mmdetection\\train\\img_tr95_png_jpg.rf.67775eaeaa99d69a27bb4c5413674998.jpg",
+      "source_group": null,
+      "sha256_of_source": null,
+      "bbox_xywh_in_montage": [
+        957,
+        46,
+        205,
+        205
+      ],
+      "source_categories": [
+        "sprout"
+      ]
+    },
+    {
+      "dataset_image": "dataset\\part-001\\onion-coco-mmdetection\\train\\img_va19_jpg.rf.8df53ee94084f564454fafafbd70efc3.jpg",
+      "source_group": null,
+      "sha256_of_source": null,
+      "bbox_xywh_in_montage": [
+        60,
+        365,
+        188,
+        188
+      ],
+      "source_categories": [
+        "rotten"
+      ]
+    },
+    {
+      "dataset_image": "dataset\\part-001\\onion-coco-mmdetection\\train\\img_tr172_jpg.rf.de9c292024023d2e8e3afff92d1c9a3f.jpg",
+      "source_group": null,
+      "sha256_of_source": null,
+      "bbox_xywh_in_montage": [
+        336,
+        359,
+        205,
+        205
+      ],
+      "source_categories": [
+        "rotten",
+        "sprout"
+      ]
+    },
+    {
+      "dataset_image": "dataset\\part-001\\onion-coco-mmdetection\\train\\img_tr56_png_jpg.rf.d16425787a27a559252c8a9c20866ded.jpg",
+      "source_group": null,
+      "sha256_of_source": null,
+      "bbox_xywh_in_montage": [
+        650,
+        360,
+        199,
+        199
+      ],
+      "source_categories": [
+        "rotten"
+      ]
+    },
+    {
+      "dataset_image": "dataset\\part-001\\onion-coco-mmdetection\\train\\img_tr198_jpg.rf.421ce8357e8aa3b4aca822ee761207be.jpg",
+      "source_group": null,
+      "sha256_of_source": null,
+      "bbox_xywh_in_montage": [
+        937,
+        353,
+        215,
+        215
+      ],
+      "source_categories": [
+        "rotten"
+      ]
+    },
+    {
+      "dataset_image": "dataset\\part-001\\onion-coco-mmdetection\\train\\img_tr5_png_jpg.rf.bdef1ea495b8190733d5c0f07558ac8a.jpg",
+      "source_group": null,
+      "sha256_of_source": null,
+      "bbox_xywh_in_montage": [
+        37,
+        652,
+        200,
+        200
+      ],
+      "source_categories": [
+        "rotten",
+        "sprout"
+      ]
+    }
+  ]
+}

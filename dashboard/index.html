@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ONION-Q — Centre Dashboard</title>
+<style>
+  :root { --ink:#1c2430; --muted:#66738a; --line:#dfe4ec; --ok:#1b7f4b;
+          --warn:#a3661a; --bad:#b02a2a; --bg:#f5f7fb; --bar:#4a6fa5; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.5 system-ui,Segoe UI,Roboto,sans-serif;
+         color:var(--ink); background:var(--bg); }
+  header { background:#12203a; color:#fff; padding:18px 24px; }
+  header h1 { margin:0; font-size:19px; letter-spacing:.3px; }
+  header .sub { color:#a9b7d0; font-size:13px; margin-top:4px; }
+  main { max-width:1150px; margin:22px auto; padding:0 18px 60px; }
+  section { background:#fff; border:1px solid var(--line); border-radius:10px;
+            padding:18px 20px; margin-bottom:18px; }
+  h2 { font-size:15px; text-transform:uppercase; letter-spacing:.6px;
+       color:var(--muted); margin:0 0 14px; }
+  .row { display:flex; gap:22px; flex-wrap:wrap; }
+  .card { flex:1 1 150px; border:1px solid var(--line); border-radius:8px;
+          padding:12px 14px; }
+  .card .n { font-size:26px; font-weight:600; }
+  .card .l { font-size:12px; color:var(--muted); text-transform:uppercase; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th,td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); }
+  th { color:var(--muted); font-weight:600; font-size:12px;
+       text-transform:uppercase; letter-spacing:.4px; }
+  code { background:#eef1f7; padding:1px 5px; border-radius:4px; font-size:13px; }
+  .pill { display:inline-block; padding:2px 8px; border-radius:20px;
+          font-size:12px; font-weight:600; }
+  .pill.ok { background:#e5f4ec; color:var(--ok); }
+  .pill.warn { background:#fdf1e2; color:var(--warn); }
+  .pill.bad { background:#fbe9e9; color:var(--bad); }
+  .pill.demo { background:#e8ecf6; color:#3c4c6b; }
+  input,button { font:inherit; padding:8px 10px; border-radius:8px;
+                 border:1px solid var(--line); }
+  button { background:#12203a; color:#fff; cursor:pointer; }
+  .note { color:var(--muted); font-size:13px; }
+  .err { color:var(--bad); }
+  .bars { display:flex; flex-direction:column; gap:8px; }
+  .bar { display:grid; grid-template-columns:190px 1fr 90px; gap:10px;
+         align-items:center; font-size:13px; }
+  .bar .track { background:#eef1f7; border-radius:6px; height:14px;
+                overflow:hidden; }
+  .bar .fill { height:100%; background:var(--bar); }
+  .bar .fill.ok { background:var(--ok); }
+  .bar .fill.bad { background:var(--bad); }
+  .bar .fill.warn { background:var(--warn); }
+  .banner { background:#fdf1e2; border:1px solid #f0d9b5; color:#7a4c10;
+            padding:10px 14px; border-radius:8px; font-size:13px;
+            margin-bottom:16px; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+  @media (max-width:860px){ .grid2 { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>ONION-Q — Centre Dashboard</h1>
+  <div class="sub">AI-assisted onion procurement grading · every figure comes from
+    reports actually synced to this server</div>
+</header>
+<main>
+  <div class="banner" id="demoBanner">
+    <strong>DEMO:</strong> figures shown here come from inspection reports stored on
+    the local API. They are demonstration records, not official procurement data.
+  </div>
+
+  <section>
+    <h2>API</h2>
+    <div class="row">
+      <input id="base" value="http://127.0.0.1:8000" style="flex:2 1 320px" />
+      <input id="center" placeholder="centre id (e.g. MH-NSK, blank = all)" style="flex:1 1 200px" />
+      <button onclick="load()">Load</button>
+    </div>
+    <p class="note" id="status">Start the API with <code>uvicorn server.app:app --port 8000</code>.</p>
+  </section>
+
+  <section>
+    <h2>Inspection KPIs</h2>
+    <div class="row" id="kpis"></div>
+    <p class="note" id="denominator"></p>
+  </section>
+
+  <div class="grid2">
+    <section>
+      <h2>Grade distribution</h2>
+      <div class="bars" id="grades"></div>
+      <p class="note">Percentages use every graded onion as the denominator
+        (<code>total_detected</code>); manual review is its own class, never removed
+        from the arithmetic.</p>
+    </section>
+
+    <section>
+      <h2>Manual-review &amp; defect reasons</h2>
+      <div class="bars" id="reasons"></div>
+      <p class="note">Escalation reasons are machine-readable codes, so the same
+        inspection can be re-evaluated when procurement rules change.</p>
+    </section>
+
+    <section>
+      <h2>Centre comparison (grade A share)</h2>
+      <table><thead><tr><th>Centre</th><th>Graded</th><th>Grade A</th><th>Share</th></tr></thead>
+        <tbody id="centers"></tbody></table>
+    </section>
+
+    <section>
+      <h2>Trend by date</h2>
+      <table><thead><tr><th>Date</th><th>Graded</th><th>Grade A</th><th>Manual review</th></tr></thead>
+        <tbody id="dates"></tbody></table>
+    </section>
+  </div>
+
+  <section>
+    <h2>Human-in-the-loop: inspector overrides</h2>
+    <div class="row" id="overrideKpis"></div>
+    <div class="bars" id="overrideReasons"></div>
+    <p class="note" id="overrideNote"></p>
+  </section>
+
+  <section>
+    <h2>Recent batches</h2>
+    <table><thead><tr><th>Report</th><th>Batch</th><th>Centre</th>
+      <th>Policy</th><th>Mode</th><th>Integrity</th></tr></thead>
+      <tbody id="reports"></tbody></table>
+    <p class="note">Integrity is checked by re-computing the report's canonical hash.
+      It is <strong>tamper-evident</strong>, not proof against forgery.</p>
+  </section>
+
+  <section>
+    <h2>Data provenance</h2>
+    <table><thead><tr><th>Item</th><th>Value</th></tr></thead>
+      <tbody id="models"></tbody></table>
+    <p class="note" id="modelnote"></p>
+  </section>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const cls = (k) => k === 'grade_a' ? 'ok' : k === 'reject' ? 'bad' : 'warn';
+const pretty = (k) => String(k).replace(/_/g, ' ');
+
+async function api(path, opts) {
+  const res = await fetch($('base').value.replace(/\/$/, '') + path, opts);
+  if (!res.ok) throw new Error(path + ' → ' + res.status);
+  return res.json();
+}
+
+function card(label, value) {
+  return '<div class="card"><div class="n">' + value + '</div>' +
+         '<div class="l">' + label + '</div></div>';
+}
+
+function bars(entries, total, kind) {
+  if (!entries.length) return '<p class="note">No data yet.</p>';
+  return entries.map(([label, value]) => {
+    const pct = total ? Math.round(1000 * value / total) / 10 : 0;
+    const k = kind ? kind(label) : '';
+    return '<div class="bar"><span><code>' + pretty(label) + '</code></span>' +
+           '<span class="track"><span class="fill ' + k + '" style="width:' +
+           Math.min(100, pct) + '%"></span></span>' +
+           '<span>' + value + ' · ' + pct + '%</span></div>';
+  }).join('');
+}
+
+function tableRows(rows, empty) {
+  if (!rows.length) return '<tr><td colspan="4" class="note">' + empty + '</td></tr>';
+  return rows.join('');
+}
+
+async function load() {
+  $('status').textContent = 'loading…';
+  const q = $('center').value ? '?center_id=' + encodeURIComponent($('center').value) : '';
+  try {
+    const summary = await api('/dashboard/summary' + q);
+    const decisions = summary.decisions || {};
+    const graded = summary.onions_graded || 0;
+    const pct = (k) => (summary.percentages || {})[k] ?? 0;
+
+    $('kpis').innerHTML =
+      card('reports synced', summary.reports) +
+      card('onions scanned', summary.onions_scanned ?? '—') +
+      card('graded', graded) +
+      card('grade A', pct('grade_a') + '%') +
+      card('relaxed', pct('relaxed') + '%') +
+      card('reject', pct('reject') + '%') +
+      card('manual review', pct('manual_review') + '%') +
+      card('mean confidence', summary.mean_confidence ?? '—') +
+      card('override rate', summary.override_analytics &&
+           summary.override_analytics.total_overrides
+             ? summary.override_analytics.disagreement_rate : '—');
+
+    $('denominator').textContent = (summary.note || '') +
+      (summary.demo_data_notice ? ' ' + summary.demo_data_notice : '');
+
+    $('grades').innerHTML = bars(Object.entries(decisions), graded, cls);
+
+    const reasonEntries = Object.entries(summary.reason_histogram || {})
+      .filter(([k]) => k !== 'MEETS_POLICY');
+    const reasonTotal = reasonEntries.reduce((a, [, v]) => a + v, 0);
+    $('reasons').innerHTML = bars(reasonEntries, reasonTotal, null);
+
+    const centerEntries = Object.entries(summary.by_center || {}).sort();
+    $('centers').innerHTML = tableRows(centerEntries.map(([id, counts]) => {
+      const cGraded = Object.values(counts).reduce((a, v) => a + v, 0);
+      const a = counts.grade_a || 0;
+      return '<tr><td>' + id + '</td><td>' + cGraded + '</td><td>' + a +
+             '</td><td>' + (cGraded ? Math.round(1000 * a / cGraded) / 10 : 0) +
+             '%</td></tr>';
+    }), 'No centres reported yet.');
+
+    const dateEntries = Object.entries(summary.by_date || {}).sort().slice(-14);
+    $('dates').innerHTML = tableRows(dateEntries.map(([date, counts]) => {
+      const cGraded = Object.values(counts).reduce((a, v) => a + v, 0);
+      return '<tr><td>' + date + '</td><td>' + cGraded + '</td><td>' +
+             (counts.grade_a || 0) + '</td><td>' +
+             (counts.manual_review || 0) + '</td></tr>';
+    }), 'No dated reports yet.');
+
+    const ov = summary.override_analytics || {};
+    $('overrideKpis').innerHTML =
+      card('inspector overrides', ov.total_overrides ?? 0) +
+      card('disagreed with AI', ov.disagreements_with_ai ?? 0) +
+      card('agreed with AI', ov.agreements_with_ai ?? 0) +
+      card('disagreement rate',
+           ov.disagreement_rate == null ? '—' : ov.disagreement_rate);
+    const ovReasons = Object.entries(ov.by_reason || {});
+    $('overrideReasons').innerHTML = bars(ovReasons,
+      ovReasons.reduce((a, [, v]) => a + v, 0), null);
+    $('overrideNote').textContent = ov.interpretation ||
+      'An override is stored beside the machine decision, so an auditor sees both.';
+
+    const list = await api('/dashboard/scans' + q);
+    const rows = [];
+    for (const scan of list.scans) {
+      const payload = scan.payload || {};
+      const batch = payload.batch || {};
+      const reportId = (payload.report || {}).report_id;
+      if (!reportId && !batch.batch_id) continue;
+      let integrity = '<span class="pill warn">not verified</span>';
+      if (reportId) {
+        try {
+          const v = await api('/report/verify/' + encodeURIComponent(reportId));
+          integrity = v.valid
+            ? '<span class="pill ok">hash matches</span>'
+            : '<span class="pill bad">HASH MISMATCH</span>';
+        } catch (e) { /* report may not be stored server-side yet */ }
+      }
+      const composed = /COMPOSED FIXTURE/i.test(payload.notes || '');
+      rows.push('<tr><td>' + (reportId || '—') + '</td><td>' +
+        (batch.batch_id || '—') + '</td><td>' + (batch.center_id || '—') +
+        '</td><td>' + ((batch.policy || {}).policy_id || '—') + '</td><td>' +
+        (composed ? '<span class="pill demo">DEMO fixture</span>'
+                  : '<span class="pill demo">DEMO</span>') +
+        '</td><td>' + integrity + '</td></tr>');
+    }
+    $('reports').innerHTML = tableRows(rows,
+      'No synced batches yet. Run the field scan, then POST to /sync/scans.');
+
+    const models = await api('/models');
+    $('models').innerHTML = Object.entries(models.models || {}).map(([id, m]) =>
+      '<tr><td>' + id + '</td><td>' + (m.task || '') + ' · ' + (m.artifact || '') +
+      ' · metrics: <code>' + (m.metrics_confidence || '?') + '</code></td></tr>').join('') +
+      (models.not_available || []).map(m => '<tr><td>' + m.model_id +
+        '</td><td class="err">artefact not present: ' + m.reason + '</td></tr>').join('');
+    $('modelnote').textContent =
+      'metrics_confidence "leak_free" is the only value that supports an unqualified ' +
+      'metric claim. The acoustic model is research-only and cannot change a grade.';
+    $('status').textContent = 'loaded from ' + $('base').value;
+  } catch (err) {
+    $('status').innerHTML = '<span class="err">' + err.message +
+      ' — is the API running?</span>';
+  }
+}
+load();
+</script>
+</body>
+</html>
