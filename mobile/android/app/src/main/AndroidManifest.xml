@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ONION-Q Android — reference manifest (not compiled in this repository).
+
+  Permissions are deliberately minimal:
+    CAMERA      tray / deep-scan capture
+    RECORD_AUDIO phone-only acoustic measurement (chirp + guided tap)
+    INTERNET    sync of journals and reports (offline-first: everything works
+                without it and is retried later)
+
+  No external hardware permission is needed: no USB ADC, no piezo sensor, no
+  Bluetooth scale. The vibrometry rig in the project plan is a future research
+  track and is deliberately absent from the mobile app.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
+    <!-- The acoustic test degrades to vision-only if the device has no mic. -->
+
+    <application
+        android:label="ONION-Q"
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:usesCleartextTraffic="true">
+        <!-- usesCleartextTraffic is for local-centre HTTP dev only; production
+             deployments must serve the API over TLS. -->
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Models are loaded from app assets / filesDir, never from untrusted
+             external storage. -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="in.onionq.scan.startup"
+            android:exported="false" />
+    </application>
+</manifest>

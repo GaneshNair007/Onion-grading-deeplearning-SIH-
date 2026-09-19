@@ -76,6 +76,11 @@ def main() -> int:
                     help="Directory tree of training WAVs")
     ap.add_argument("--out-dir", type=Path, default=MODEL_DIR)
     ap.add_argument("--with-logreg", action="store_true")
+    ap.add_argument("--require-verified-onion-data", action="store_true",
+                    help="refuse to train unless the data carries verified "
+                         "onion ground truth (dataset_type="
+                         "verified_onion_acoustic). Use this for any run whose "
+                         "metrics will be quoted.")
     args = ap.parse_args()
 
     try:
@@ -93,6 +98,34 @@ def main() -> int:
     if not wavs:
         print(f"ERROR: no WAV files under {args.data}", file=sys.stderr)
         return 1
+
+    if args.require_verified_onion_data:
+        # The gate exists because a synthetic model quoting an "onion" metric is
+        # worse than no model: it is a false claim dressed as a number.
+        verified = []
+        for wav in wavs:
+            sidecar = wav.with_suffix(".json")
+            if not sidecar.exists():
+                continue
+            meta = json.loads(sidecar.read_text(encoding="utf-8"))
+            types = meta.get("dataset_type") or []
+            if isinstance(types, str):
+                types = [types]
+            if "verified_onion_acoustic" in types and meta.get("internal_label"):
+                verified.append(wav)
+        if not verified:
+            print(
+                "REFUSING TO TRAIN: --require-verified-onion-data was set but no "
+                "recording carries dataset_type=verified_onion_acoustic with an "
+                "internal_label from cut-open ground truth.\n"
+                "Synthetic or auxiliary audio cannot produce an onion "
+                "internal-defect metric. Collect real data first:\n"
+                "  python scripts/collect_acoustic_sample.py --help\n"
+                "  python scripts/add_cut_open_ground_truth.py --help",
+                file=sys.stderr)
+            return 2
+        wavs = verified
+        print(f"verified onion recordings: {len(wavs)}")
 
     rows, groups, labels, dataset_types = [], [], [], []
     for wav in wavs:
