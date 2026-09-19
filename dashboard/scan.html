@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ONION-Q — Scan</title>
+<style>
+  :root { --bg:#0d1117; --card:#161b22; --line:#30363d; --fg:#e6edf3; --dim:#8b949e;
+          --ok:#3fb950; --warn:#d29922; --bad:#f85149; --accent:#58a6ff; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.45 system-ui,Segoe UI,Roboto,sans-serif;
+         background:var(--bg); color:var(--fg); padding:16px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  h2 { font-size:15px; margin:18px 0 8px; color:var(--accent); }
+  .demo-banner { background:#3b2f0b; color:#f0d47a; border:1px solid #7a5c11;
+                 padding:6px 10px; border-radius:8px; font-size:13px; margin-bottom:14px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:14px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; }
+  video,canvas { width:100%; border-radius:8px; background:#000; max-height:340px; object-fit:contain; }
+  button { font:inherit; padding:9px 14px; border-radius:8px; border:1px solid var(--line);
+           background:#21262d; color:var(--fg); cursor:pointer; margin:4px 4px 4px 0; }
+  button.primary { background:#1f6feb; border-color:#1f6feb; color:#fff; }
+  button:disabled { opacity:.45; cursor:not-allowed; }
+  input,select { font:inherit; padding:8px; border-radius:8px; border:1px solid var(--line);
+                 background:#0d1117; color:var(--fg); width:100%; margin:3px 0 10px; }
+  .badge { display:inline-block; padding:2px 10px; border-radius:99px; font-size:13px; font-weight:600; }
+  .b-ok { background:#12351c; color:var(--ok); } .b-warn { background:#37290a; color:var(--warn); }
+  .b-bad { background:#3d1417; color:var(--bad); } .b-dim { background:#1c2431; color:var(--dim); }
+  .kv { display:flex; justify-content:space-between; border-bottom:1px dashed var(--line);
+        padding:4px 0; font-size:14px; }
+  .kv span:first-child { color:var(--dim); }
+  pre { background:#0a0d12; border:1px solid var(--line); border-radius:8px; padding:10px;
+        overflow:auto; max-height:260px; font-size:12px; }
+  .muted { color:var(--dim); font-size:13px; }
+  .err { color:var(--bad); font-size:13px; white-space:pre-wrap; }
+  .ok-note { color:var(--ok); font-size:13px; }
+  audio { width:100%; margin-top:6px; }
+</style>
+</head>
+<body>
+<h1>ONION-Q — Onion Scan</h1>
+<div class="demo-banner">DEMO grading configuration — policy <code>source_verified=false</code>.
+Acoustic result is <b>research-only</b> (synthetic-trained model) and can never change a grade.</div>
+
+<div class="grid">
+  <!-- ================================================== CAMERA -->
+  <section class="card">
+    <h2>1 · Camera (computer vision)</h2>
+    <video id="cam" autoplay playsinline muted></video>
+    <canvas id="snap" hidden></canvas>
+    <div style="margin-top:8px">
+      <button id="startCam">Start camera</button>
+      <button id="capture" class="primary" disabled>Capture frame</button>
+      <label class="muted" style="display:block;margin-top:6px">or pick a file:
+        <input type="file" id="file" accept="image/*" />
+      </label>
+    </div>
+    <div class="muted" id="camState">Camera not started.</div>
+    <h2>Scan</h2>
+    <label>Policy
+      <select id="policy"><option value="demo_policy">demo_policy (DEMO)</option>
+        <option value="strict_with_segmentation">strict_with_segmentation</option></select>
+    </label>
+    <label>Mode
+      <select id="mode">
+        <option value="single">Single onion — /scan/image</option>
+        <option value="batch">Tray / batch — /scan/batch</option>
+      </select>
+    </label>
+    <div id="batchFields" hidden>
+      <label>Batch id <input id="batchId" value="MH-NSK-WEB-001" /></label>
+    </div>
+    <button id="scan" class="primary" disabled>Scan captured image</button>
+    <div class="err" id="scanErr"></div>
+  </section>
+
+  <!-- ================================================== RESULTS -->
+  <section class="card">
+    <h2>Vision / grading result</h2>
+    <div id="visionOut" class="muted">No scan yet — capture a frame, then press <b>Scan captured image</b>.</div>
+  </section>
+
+  <!-- ================================================== ACOUSTIC -->
+  <section class="card">
+    <h2>2 · Acoustic deep scan (speaker → mic)</h2>
+    <p class="muted">Plays a 1 s logarithmic chirp through this device's <b>speaker</b> and
+       records through its <b>microphone</b> (onion on a hard surface, mic ~2–5 cm away).
+       The clip is encoded to WAV in the browser and analysed server-side.
+       Ambient baseline is captured first for noise gating.</p>
+    <button id="recAmbient">Record ambient baseline</button>
+    <button id="recChirp" class="primary">Play chirp + record</button>
+    <button id="recTap">Record guided tap (3 s)</button>
+    <div class="muted" id="audState">Idle.</div>
+    <audio id="playback" controls></audio>
+    <div class="err" id="audErr"></div>
+    <h2>Acoustic result</h2>
+    <div id="audOut" class="muted">No recording yet.</div>
+  </section>
+</div>
+
+<h2>Raw JSON (last response)</h2>
+<section class="card"><pre id="raw">—</pre></section>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const API = window.location.origin; // same origin as this page (served by the API)
+
+/* ------------------------------------------------------------ camera */
+let stream = null, frame = null; // frame: Blob (image/jpeg)
+$("startCam").onclick = async () => {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia(
+      { video: { facingMode: "environment", width: {ideal:1280} }, audio: false });
+    $("cam").srcObject = stream;
+    $("capture").disabled = false;
+    $("camState").textContent = "Camera live.";
+  } catch (e) { $("camState").innerHTML = '<span class="err">Camera unavailable: ' + e.message + ' — use file input.</span>'; }
+};
+$("capture").onclick = () => {
+  const v = $("cam"), c = $("snap");
+  c.width = v.videoWidth || 640; c.height = v.videoHeight || 480;
+  c.getContext("2d").drawImage(v, 0, 0, c.width, c.height);
+  c.toBlob(b => { frame = b; $("scan").disabled = false;
+    $("camState").textContent = "Frame captured (" + Math.round(b.size/1024) + " KB) — ready to scan."; }, "image/jpeg", 0.92);
+};
+$("file").onchange = e => { frame = e.target.files[0] || null;
+  $("scan").disabled = !frame;
+  $("camState").textContent = frame ? "File selected: " + frame.name : "No file."; };
+$("mode").onchange = e => $("batchFields").hidden = e.target.value !== "batch";
+
+/* ------------------------------------------------------------ scan */
+$("scan").onclick = async () => {
+  $("scanErr").textContent = ""; $("visionOut").className = "muted";
+  $("visionOut").textContent = "Scanning…";
+  if (!frame) { $("scanErr").textContent = "Capture a frame or pick a file first."; return; }
+  try {
+    const fd = new FormData();
+    const single = $("mode").value === "single";
+    fd.append(single ? "image" : "images", frame, "capture.jpg");
+    fd.append("policy", $("policy").value);
+    if (!single) fd.append("batch_id", $("batchId").value || "MH-NSK-WEB-001");
+    const r = await fetch(API + (single ? "/scan/image" : "/scan/batch"),
+                          { method:"POST", body: fd });
+    if (!r.ok) throw new Error(r.status + " " + (await r.text()).slice(0,200));
+    const out = await r.json();
+    renderVision(out, single); $("raw").textContent = JSON.stringify(out, null, 2);
+  } catch (e) { $("visionOut").textContent = ""; $("scanErr").textContent = "Scan failed: " + e.message; }
+};
+
+const badge = (t, cls) => '<span class="badge ' + cls + '">' + t + "</span>";
+const gradeBadge = d => d === "grade_a" ? badge("GRADE A", "b-ok")
+  : d === "relaxed" ? badge("RELAXED / POLICY B", "b-warn")
+  : d === "reject" ? badge("REJECT", "b-bad")
+  : d === "not_onion" ? badge("NOT AN ONION", "b-bad")
+  : badge("MANUAL REVIEW", "b-warn");
+
+function renderVision(out, single) {
+  let h = "";
+  if (single) {
+    // Real API shape: { status, is_onion, onion: { vision, size, measurements, decision, ... } }
+    const r = out.onion || {};
+    h += '<div style="margin:6px 0 10px">' + gradeBadge((r.decision||{}).decision) + "</div>";
+    h += kv("is_onion", out.is_onion === true ? "yes (detector gate)" :
+          out.is_onion === false ? "NO — NOT AN ONION" : "uncertain");
+    const v = r.vision || {};
+    h += kv("visible label", (v.label ?? "—") + " · conf " + (v.confidence ?? "—"));
+    for (const [k,d] of Object.entries(v.defects || {}))
+      h += kv("defect: " + k, (d.confidence ?? "—") + (d.detected ? " · DETECTED" : ""));
+    const s = r.size || {};
+    h += kv("diameter", s.diameter_mm != null ? s.diameter_mm + " mm (" + s.size_method + ")"
+          : (s.size_method || "unavailable"));
+    if (s.approximate_size) h += kv("bbox (px)", (s.approximate_size.bbox_px||[]).join(" × "));
+    for (const w of (s.warnings||[])) h += kv("size warning", w.split(":")[0]);
+    const m = r.measurements || {};
+    for (const rc of (r.decision||{}).reason_codes || []) h += kv("reason", rc);
+    for (const t of (r.decision||{}).reasons_text || []) h += kv("", t);
+  } else {
+    const b = ((out.batch||{}).summary) || out.batch || {}, rep = out.report || {};
+    const counts = b.counts || out.batch?.counts || {};
+    h += '<div style="margin:6px 0 10px">' +
+      badge((counts.grade_a||0) + " × Grade A", "b-ok") + " " +
+      badge((counts.relaxed||0) + " × Relaxed", "b-warn") + " " +
+      badge((counts.reject||0) + " × Reject", "b-bad") + " " +
+      badge((counts.manual_review||0) + " × Review", "b-dim") + "</div>";
+    h += kv("batch id", b.batch_id || out.batch?.batch_id || "—");
+    const pct = b.percentages || {};
+    if (Object.keys(pct).length)
+      h += kv("grade split", "A " + (pct.grade_a??0) + "% · relaxed " + (pct.relaxed??0) + "% · reject " + (pct.reject??0) + "% · review " + (pct.manual_review??0) + "%");
+    if (b.mean_confidence != null) h += kv("mean confidence", b.mean_confidence);
+    if (rep.report_id) h += kv("report", rep.report_id);
+    if (rep.report_hash) h += kv("integrity hash", String(rep.report_hash).slice(0,26) + "…");
+    const ons = out.onions || [];
+    if (ons.length) {
+      h += '<table style="width:100%;font-size:13px;margin-top:8px;border-collapse:collapse">' +
+        '<tr style="color:var(--dim)"><td>onion</td><td>decision</td><td>diameter</td><td>detected defects</td></tr>';
+      for (const o of ons.slice(0, 30)) {
+        const d = o.decision || {}, m = o.measurements || {}, v = o.vision || {};
+        const def = Object.entries(v.defects||{}).filter(([,x])=>x.detected).map(([k])=>k).join(", ") || "—";
+        h += "<tr><td>" + (o.onion_id||"?") + "</td><td>" + gradeBadge(d.decision) +
+             "</td><td>" + (m.diameter_mm!=null? m.diameter_mm+" mm":(o.size||{}).size_method||"—") + "</td><td>" + def + "</td></tr>";
+      }
+      h += "</table>";
+    }
+  }
+  $("visionOut").innerHTML = h;
+}
+const kv = (k, v) => '<div class="kv"><span>' + k + "</span><span>" + v + "</span></div>";
+
+/* ------------------------------------------- audio: WAV encoder + capture */
+let audioCtx = null, mediaStream = null;
+function ctx() { return audioCtx || (audioCtx = new (window.AudioContext||window.webkitAudioContext)()); }
+
+async function recordSeconds(seconds, {chirp=false, label="recording"}={}) {
+  $("audErr").textContent = "";
+  mediaStream = await navigator.mediaDevices.getUserMedia(
+    { audio: { echoCancellation:false, noiseSuppression:false, autoGainControl:false } });
+  const ac = ctx(); await ac.resume();
+  const src = ac.createMediaStreamSource(mediaStream);
+  const proc = ac.createScriptProcessor(4096, 1, 1);
+  const chunks = []; let done = false;
+  proc.onaudioprocess = ev => { if (!done) chunks.push(new Float32Array(ev.inputBuffer.getChannelData(0))); };
+  src.connect(proc); proc.connect(ac.destination); // destination needed in some browsers
+  let chirpEnd = null;
+  if (chirp) {
+    const t0 = ac.currentTime + 0.15;
+    const osc = ac.createOscillator(), g = ac.createGain();
+    osc.frequency.setValueAtTime(1000, t0);
+    osc.frequency.exponentialRampToValueAtTime(8000, t0 + 1.0); // log chirp: speaker → onion → mic
+    g.gain.setValueAtTime(0.25, t0); g.gain.setValueAtTime(0, t0 + 1.0);
+    osc.connect(g).connect(ac.destination); osc.start(t0); osc.stop(t0 + 1.05);
+    chirpEnd = t0 + 1.0;
+  }
+  $("audState").textContent = (chirp ? "Chirp playing + " : "") + label + " (" + seconds + " s)…";
+  await new Promise(res => setTimeout(res, seconds * 1000));
+  done = true; src.disconnect(); proc.disconnect();
+  mediaStream.getTracks().forEach(t => t.stop());
+  const sr = ac.sampleRate, total = chunks.reduce((n,c)=>n+c.length,0);
+  const pcm = new Float32Array(total); let off = 0;
+  for (const c of chunks) { pcm.set(c, off); off += c.length; }
+  return { blob: encodeWav(pcm, sr), sampleRate: sr, seconds: total/sr, chirpEnd };
+}
+function encodeWav(samples, rate) { // mono 16-bit PCM WAV
+  const buf = new ArrayBuffer(44 + samples.length*2), v = new DataView(buf);
+  const ws = (o,s)=>{ for (let i=0;i<s.length;i++) v.setUint8(o+i, s.charCodeAt(i)); };
+  ws(0,"RIFF"); v.setUint32(4, 36+samples.length*2, true); ws(8,"WAVE"); ws(12,"fmt ");
+  v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,rate,true); v.setUint32(28,rate*2,true); v.setUint16(32,2,true);
+  v.setUint16(34,16,true); ws(36,"data"); v.setUint32(40,samples.length*2,true);
+  let o = 44; for (let i=0;i<samples.length;i++,o+=2) {
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    v.setInt16(o, s<0 ? s*0x8000 : s*0x7FFF, true);
+  }
+  return new Blob([buf], { type:"audio/wav" });
+}
+async function postAudio(path, blob, name) {
+  const fd = new FormData(); fd.append("audio", blob, name);
+  const r = await fetch(API + path, { method:"POST", body:fd });
+  if (!r.ok) throw new Error(r.status + " " + (await r.text()).slice(0,200));
+  return r.json();
+}
+function renderAcoustic(out, kind) {
+  let h = "";
+  const st = out.status || out.quality?.status || "unknown";
+  const cls = st === "valid" ? "b-ok" : st === "retest_required" ? "b-bad" : "b-warn";
+  h += '<div style="margin:4px 0 8px">' + badge("status: " + st, cls) + "</div>";
+  const q = out.quality || {};
+  if (q.clipping != null) h += kv("clipping", q.clipping);
+  if (q.silence != null) h += kv("silence", q.silence);
+  if (q.snr_db != null) h += kv("SNR (dB)", q.snr_db);
+  if (out.ambient_noise_score != null) h += kv("ambient noise", out.ambient_noise_score);
+  const a = out.acoustic || out;
+  if (a.internal_defect_probability != null)
+    h += kv("internal-defect prob (RESEARCH ONLY)", a.internal_defect_probability);
+  if (a.confidence != null) h += kv("confidence", a.confidence);
+  if (a.model_version) h += kv("model", a.model_version);
+  const f = a.features || out.features || {};
+  for (const k of ["rms","dominant_frequency_hz","spectral_centroid_hz","zero_crossing_rate","resonance_peak_hz"])
+    if (f[k] != null) h += kv(k.replace(/_/g," "), (+f[k]).toFixed(2));
+  if (a.retest_required) h += '<div class="err">Retest required: ' + (a.reasons||[]).join("; ") + "</div>";
+  h += '<div class="muted" style="margin-top:6px">Synthetic-trained demo model — NOT a validated internal-rot detector. Real onion ground truth pending.</div>';
+  $("audOut").innerHTML = h;
+  $("raw").textContent = JSON.stringify(out, null, 2);
+}
+
+$("recAmbient").onclick = async () => {
+  try { const rec = await recordSeconds(2, {label:"ambient"});
+    $("playback").src = URL.createObjectURL(rec.blob);
+    renderAcoustic(await postAudio("/acoustic/ambient", rec.blob, "ambient.wav"), "ambient");
+    $("audState").textContent = "Ambient baseline stored (" + rec.seconds.toFixed(1) + " s).";
+  } catch (e) { $("audErr").textContent = "Ambient failed: " + e.message; }
+};
+$("recChirp").onclick = async () => {
+  try { const rec = await recordSeconds(3, {chirp:true, label:"chirp response"});
+    $("playback").src = URL.createObjectURL(rec.blob);
+    renderAcoustic(await postAudio("/acoustic/classify", rec.blob, "chirp_response.wav"), "chirp");
+    $("audState").textContent = "Chirp capture complete (" + rec.seconds.toFixed(1) + " s, " + Math.round(rec.sampleRate/100)/10 + " kHz).";
+  } catch (e) { $("audErr").textContent = "Chirp failed: " + e.message; }
+};
+$("recTap").onclick = async () => {
+  try { $("audState").textContent = "Tap the onion 3× on the mic-side surface now…";
+    const rec = await recordSeconds(3, {label:"tap"});
+    $("playback").src = URL.createObjectURL(rec.blob);
+    renderAcoustic(await postAudio("/acoustic/classify", rec.blob, "tap_response.wav"), "tap");
+    $("audState").textContent = "Tap capture complete (" + rec.seconds.toFixed(1) + " s).";
+  } catch (e) { $("audErr").textContent = "Tap failed: " + e.message; }
+};
+</script>
+</body>
+</html>
