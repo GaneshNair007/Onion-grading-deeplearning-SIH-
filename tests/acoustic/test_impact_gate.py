@@ -109,15 +109,32 @@ def test_classify_returns_no_impact_for_noise(tmp_path):
 
 
 def test_classify_still_answers_for_a_real_tap(tmp_path):
-    from inference.acoustic_inference import classify_acoustic
+    """A real tap must reach the model stage — never be blocked by the
+    impact gate. The exact status then depends on whether the (machine-
+    local, synthetic) model artifact exists in this checkout:
+
+    * artifact present  -> status "valid", research-only labels intact;
+    * artifact absent   -> status "model_not_trained", probability None.
+
+    Both are correct pipeline behavior; neither may be a false answer.
+    """
+    from inference.acoustic_inference import MODEL_PATH, classify_acoustic
 
     p = _write_wav(tmp_path / "tap.wav", _tap(rng=np.random.default_rng(2)))
     r = classify_acoustic(str(p))
-    assert r["status"] == "valid"
-    assert r["internal_defect_probability"] is not None
-    # Honesty labels unchanged: synthetic demo can never grade.
-    assert r["research_only"] is True
-    assert r["grading_eligible"] is False
+    # The gate must NOT have fired for a genuine tap.
+    assert r["status"] != "no_impact_detected"
+    assert all("excitation" not in w for w in r["warnings"])
+
+    if MODEL_PATH.exists():
+        assert r["status"] == "valid"
+        assert r["internal_defect_probability"] is not None
+        # Honesty labels unchanged: synthetic demo can never grade.
+        assert r["research_only"] is True
+        assert r["grading_eligible"] is False
+    else:
+        assert r["status"] == "model_not_trained"
+        assert r["internal_defect_probability"] is None
 
 
 def test_fusion_never_uses_impactless_audio(tmp_path):
