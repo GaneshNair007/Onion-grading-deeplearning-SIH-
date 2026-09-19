@@ -12,24 +12,25 @@
 #   pip install torch==2.13.0 torchvision==0.28.0 --index-url https://download.pytorch.org/whl/cpu
 
 # --- core numerics / vision ---
+# NOTE: pins below are the exact versions verified working together on the
+# dev machine AND resolvable on PyPI. CI failure on 2026-09-20 was caused by
+# opencv-python-headless==5.0.0.88, a version that was never published.
 numpy==2.5.2
 scipy==1.17.1
 scikit-learn==1.4.2
 pandas==2.2.2
-joblib==1.4.2
+joblib==1.5.3
 Pillow==12.3.0
-opencv-python-headless==5.0.0.88
+opencv-python-headless==5.0.0.93
 torch==2.13.0
 torchvision==0.28.0
 
-# --- acoustic pipeline ---
-soundfile==0.12.1        # optional: WAV read/write beyond scipy.io.wavfile
-
 # --- API service (server/) ---
 fastapi==0.141.1
-uvicorn==0.34.0
-pydantic==2.11.0
-python-multipart==0.0.20   # multipart uploads for camera/audio endpoints
+uvicorn==0.52.4
+pydantic==2.13.3
+python-multipart==0.0.32   # multipart uploads for camera/audio endpoints
+requests==2.34.2           # Supabase PostgREST sync (src/integrations/)
 # No ORM: server/store.py uses the standard-library sqlite3 module.
 
 # --- reporting ---
