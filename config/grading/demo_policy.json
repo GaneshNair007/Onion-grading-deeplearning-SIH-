@@ -1,0 +1,62 @@
+{
+  "policy_id": "ONIONQ_DEMO_STRICT_V1",
+  "version": "1.0.0",
+  "effective_from": "2026-09-18",
+  "source": "DEMO POLICY - configured for demonstration and testing. Diameter range follows the Grade-A figure reported in the press context (45-65 mm) but has NOT been verified against an official government specification document by this project.",
+  "source_verified": false,
+  "source_type": "news_context",
+  "source_url": "",
+  "verification_date": "",
+  "effective_to": null,
+  "context_urls": [
+    "https://timesofindia.indiatimes.com/city/nashik/centre-hikes-onion-procurement-rate-to-rs-23-35/kg-but-tightens-quality-norms-farmers-fume-at-meagre-increase/articleshow/132747274.cms",
+    "https://indianexpress.com/article/india/centre-onion-procurement-buffer-stock-2026-10689940/"
+  ],
+  "access_date": "2026-09-18",
+  "grades": {
+    "grade_a": {
+      "min_diameter_mm": 45,
+      "max_diameter_mm": 65,
+      "allow_visible_rot": false,
+      "allow_sprouting": false,
+      "max_surface_damage_pct": null,
+      "max_internal_defect_probability": 0.4,
+      "requires_acoustic_evidence": false
+    },
+    "relaxed": {
+      "min_diameter_mm": 35,
+      "max_diameter_mm": 70,
+      "allow_visible_rot": false,
+      "allow_sprouting": false,
+      "max_surface_damage_pct": null,
+      "max_internal_defect_probability": 0.6,
+      "requires_acoustic_evidence": false
+    },
+    "reject": {
+      "min_diameter_mm": null,
+      "max_diameter_mm": null,
+      "allow_visible_rot": true,
+      "allow_sprouting": true,
+      "max_surface_damage_pct": null,
+      "max_internal_defect_probability": null,
+      "requires_acoustic_evidence": false
+    }
+  },
+  "manual_review": {
+    "min_model_confidence": 0.65,
+    "on_multimodal_disagreement": true,
+    "on_missing_calibration": true,
+    "max_occlusion_fraction": 0.35
+  },
+  "size": {
+    "units": "mm",
+    "require_calibration_for_decision": true
+  },
+  "notes": [
+    "These are DEMO thresholds for a working prototype; they are NOT an official procurement standard.",
+    "max_surface_damage_pct is null here because the current detector returns BOXES, not masks, so a defect surface-area percentage cannot be measured. A policy must never require a measurement the pipeline cannot produce: see config/grading/strict_with_segmentation.json, which sets the limit and therefore escalates every onion to manual_review with MEASUREMENT_UNAVAILABLE until a segmentation model exists.",
+    "The 'relaxed' grade models the real URS (Under Relaxed Specifications) procurement class that has been introduced and withdrawn repeatedly - which is exactly why grading must be policy-driven rather than baked into model weights.",
+    "Replace the values and set source_verified=true only after an official specification document is obtained. Enforcement is automatic: src/grading/policy.py REFUSES to load a policy whose source_verified=true lacks source_url + verification_date + an official source_type.",
+    "source_type values: official_document | tender | news_context | demo."
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ONION-Q procurement grading policy",
+  "description": "A policy converts measurements into procurement decisions. Policies are versioned and hashed; decisions record the exact policy id + hash used. Official values must only be entered after verification (source_verified=true) - see POLICY_SOURCES.md.",
+  "type": "object",
+  "required": ["policy_id", "version", "effective_from", "source", "source_verified"],
+  "properties": {
+    "policy_id": {"type": "string"},
+    "version": {"type": "string"},
+    "effective_from": {"type": "string", "description": "ISO date"},
+    "source": {"type": "string"},
+    "source_verified": {
+      "type": "boolean",
+      "description": "true only when taken from an official specification document held by the team; when true, source_url + verification_date + an official source_type are REQUIRED and enforced by src/grading/policy.py"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": ["official_document", "tender", "news_context", "demo", "unknown"],
+      "description": "kind of evidence behind the thresholds; news_context can never be verified"
+    },
+    "source_url": {"type": "string", "description": "URL or file reference of the specification actually used"},
+    "verification_date": {"type": "string", "description": "ISO date the specification was checked by a human"},
+    "effective_to": {"type": ["string", "null"], "description": "ISO date the policy stops applying"},
+    "context_urls": {"type": "array", "items": {"type": "string"}},
+    "access_date": {"type": "string"},
+    "grades": {
+      "type": "object",
+      "description": "Ordered decision classes with their acceptance rules",
+      "properties": {
+        "grade_a": {"$ref": "#/definitions/rule_set"},
+        "relaxed": {"$ref": "#/definitions/rule_set"},
+        "reject": {"$ref": "#/definitions/rule_set"}
+      }
+    },
+    "manual_review": {
+      "type": "object",
+      "properties": {
+        "min_model_confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "on_multimodal_disagreement": {"type": "boolean"},
+        "on_missing_calibration": {"type": "boolean"},
+        "max_occlusion_fraction": {"type": "number"}
+      }
+    },
+    "size": {
+      "type": "object",
+      "properties": {
+        "units": {"type": "string", "enum": ["mm"]},
+        "require_calibration_for_decision": {
+          "type": "boolean",
+          "description": "when true, uncalibrated size forces manual review instead of a size-based decision"
+        }
+      }
+    },
+    "notes": {"type": "array", "items": {"type": "string"}}
+  },
+  "definitions": {
+    "rule_set": {
+      "type": "object",
+      "properties": {
+        "min_diameter_mm": {"type": ["number", "null"]},
+        "max_diameter_mm": {"type": ["number", "null"]},
+        "allow_visible_rot": {"type": "boolean"},
+        "allow_sprouting": {"type": "boolean"},
+        "max_surface_damage_pct": {"type": ["number", "null"]},
+        "max_internal_defect_probability": {"type": ["number", "null"]},
+        "requires_acoustic_evidence": {"type": "boolean"}
+      }
+    }
+  }
+}

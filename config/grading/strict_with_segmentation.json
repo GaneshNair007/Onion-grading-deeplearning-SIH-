@@ -1,0 +1,56 @@
+{
+  "policy_id": "ONIONQ_DEMO_STRICT_SEG_V1",
+  "version": "1.0.0",
+  "effective_from": "2026-09-18",
+  "source": "DEMO POLICY (strict variant) - illustrates a policy that requires a measured defect surface-area percentage. The pipeline cannot produce that measurement yet (the detector returns boxes, not masks), so every onion escalates to manual_review with MEASUREMENT_UNAVAILABLE. This file exists to prove that the architecture supports stricter future standards without retraining any model.",
+  "source_verified": false,
+  "source_type": "demo",
+  "source_url": "",
+  "verification_date": "",
+  "effective_to": null,
+  "context_urls": [],
+  "access_date": "2026-09-18",
+  "grades": {
+    "grade_a": {
+      "min_diameter_mm": 45,
+      "max_diameter_mm": 65,
+      "allow_visible_rot": false,
+      "allow_sprouting": false,
+      "max_surface_damage_pct": 1.0,
+      "max_internal_defect_probability": 0.3,
+      "requires_acoustic_evidence": false
+    },
+    "relaxed": {
+      "min_diameter_mm": 35,
+      "max_diameter_mm": 70,
+      "allow_visible_rot": false,
+      "allow_sprouting": false,
+      "max_surface_damage_pct": 3.0,
+      "max_internal_defect_probability": 0.5,
+      "requires_acoustic_evidence": false
+    },
+    "reject": {
+      "min_diameter_mm": null,
+      "max_diameter_mm": null,
+      "allow_visible_rot": true,
+      "allow_sprouting": true,
+      "max_surface_damage_pct": null,
+      "max_internal_defect_probability": null,
+      "requires_acoustic_evidence": false
+    }
+  },
+  "manual_review": {
+    "min_model_confidence": 0.65,
+    "on_multimodal_disagreement": true,
+    "on_missing_calibration": true,
+    "max_occlusion_fraction": 0.35
+  },
+  "size": {
+    "units": "mm",
+    "require_calibration_for_decision": true
+  },
+  "notes": [
+    "Select with: python scripts/demo_batch_scan.py --policy strict_with_segmentation",
+    "Expected behaviour today: every onion is manual_review / MEASUREMENT_UNAVAILABLE. That is the correct, honest outcome, not a bug."
+  ]
+}

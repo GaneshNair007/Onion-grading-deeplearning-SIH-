@@ -9,11 +9,20 @@ Return contract (mirrors the shared fusion interface):
       "audio_quality": {...quality report...},
       "features": {...} | None,
       "model_version": str,
+      "dataset_type": [str],          # from the artifact's own metadata
+      "ground_truth_verified": bool,  # True only for verified onion audio
+      "research_only": bool,          # True whenever grading_eligible is False
+      "grading_eligible": bool,       # the single gate used by fusion/grading
       "warnings": [...]
     }
 
 The model shipped/trained today is a SYNTHETIC demo; the status text and
-model card never describe it as an onion internal-defect model.
+model card never describe it as an onion internal-defect model. Crucially,
+``status: "valid"`` means **the recording was good enough to analyse** — it is
+not a claim that the model is validated. ``grading_eligible`` is the only flag
+that may let acoustic evidence influence a procurement decision, and it stays
+``False`` until a model carries verified onion ground truth (see
+``src/common/contracts.py::acoustic_grading_eligible``).
 """
 from __future__ import annotations
 
@@ -40,43 +49,68 @@ def _load_model(model_path: Optional[str] = None):
     return joblib.load(path)
 
 
+def model_dataset_types(artifact: Optional[Dict[str, Any]]) -> list:
+    """Dataset classes recorded **by the artifact itself** (never inferred)."""
+    if not artifact:
+        return []
+    raw = (artifact.get("metadata") or {}).get("dataset_type") or []
+    if isinstance(raw, str):
+        raw = [raw]
+    return [str(item) for item in raw] or ["unknown"]
+
+
+def _status_block(status: str, quality: Dict[str, Any],
+                  features: Optional[Dict[str, Any]],
+                  dataset_types: list, model_version: str,
+                  warnings: list, probability: Optional[float] = None,
+                  confidence: Optional[float] = None) -> Dict[str, Any]:
+    """One construction point, so every return carries the same flags."""
+    from src.common.contracts import (VERIFIED_ONION_ACOUSTIC,
+                                      acoustic_grading_eligible)
+    ground_truth_verified = VERIFIED_ONION_ACOUSTIC in dataset_types
+    payload = {
+        "status": status,
+        "internal_defect_probability": probability,
+        "confidence": confidence,
+        "audio_quality": quality,
+        "features": features,
+        "model_version": model_version,
+        "dataset_type": dataset_types,
+        "ground_truth_verified": ground_truth_verified,
+        "research_only": not ground_truth_verified,
+        "warnings": list(warnings),
+    }
+    payload["grading_eligible"] = acoustic_grading_eligible(payload)
+    return payload
+
+
 def classify_acoustic(audio_path: str, model_path: Optional[str] = None) -> Dict[str, Any]:
     """Run quality gates + feature extraction + baseline model on one WAV."""
     artifact = _load_model(model_path)
     warnings: list[str] = []
+    dataset_types = model_dataset_types(artifact)
 
     result = analyze_file(audio_path)
     quality = result["quality"]
     if result["features"] is None:
-        return {
-            "status": "retest_required",
-            "internal_defect_probability": None,
-            "confidence": None,
-            "audio_quality": quality,
-            "features": None,
-            "model_version": MODEL_VERSION,
-            "warnings": warnings + [result.get("error", "quality gates failed")],
-        }
+        return _status_block(
+            "retest_required", quality, None, dataset_types, MODEL_VERSION,
+            warnings + [result.get("error", "quality gates failed")])
 
     if artifact is None:
-        return {
-            "status": "model_not_trained",
-            "internal_defect_probability": None,
-            "confidence": None,
-            "audio_quality": quality,
-            "features": result["features"],
-            "model_version": "none",
-            "warnings": warnings + [
+        return _status_block(
+            "model_not_trained", quality, result["features"], dataset_types,
+            "none",
+            warnings + [
                 "No trained acoustic model found; run training/train_acoustic.py. "
-                "No prediction is made."],
-        }
+                "No prediction is made."])
 
     import numpy as np
     model = artifact["model"]
-    if artifact.get("metadata", {}).get("dataset_type") == ["synthetic"]:
+    if not warnings and "synthetic" in dataset_types:
         warnings.append(
             "Model was trained on SYNTHETIC audio (demo). Its internal-defect "
-            "probability is not an onion measurement.")
+            "probability is not an onion measurement and cannot change a grade.")
 
     x = np.asarray([[result["features"][k] for k in artifact["feature_order"]]],
                    dtype=np.float32)
@@ -89,27 +123,17 @@ def classify_acoustic(audio_path: str, model_path: Optional[str] = None) -> Dict
     confidence = round(min(1.0, 0.5 * margin + 0.5 * quality_factor), 3)
 
     if confidence < CONFIDENCE_FLOOR:
-        return {
-            "status": "retest_required",
-            "internal_defect_probability": round(prob, 4),
-            "confidence": confidence,
-            "audio_quality": quality,
-            "features": result["features"],
-            "model_version": MODEL_VERSION,
-            "warnings": warnings + [
+        return _status_block(
+            "retest_required", quality, result["features"], dataset_types,
+            MODEL_VERSION,
+            warnings + [
                 f"confidence {confidence} below floor {CONFIDENCE_FLOOR}; "
                 "retest required rather than a confident guess"],
-        }
+            probability=round(prob, 4), confidence=confidence)
 
-    return {
-        "status": "valid",
-        "internal_defect_probability": round(prob, 4),
-        "confidence": confidence,
-        "audio_quality": quality,
-        "features": result["features"],
-        "model_version": MODEL_VERSION,
-        "warnings": warnings,
-    }
+    return _status_block(
+        "valid", quality, result["features"], dataset_types, MODEL_VERSION,
+        warnings, probability=round(prob, 4), confidence=confidence)
 
 
 if __name__ == "__main__":

@@ -3,7 +3,10 @@
 Implements the shared interface from the project spec. Rules:
 
 - A non-onion image short-circuits everything (final label "not_onion").
-- Valid acoustic evidence is fused with vision by weighted combination.
+- Acoustic evidence is fused ONLY when `acoustic_grading_eligible()` is true —
+  i.e. the recording passed its gates **and** the model carries verified onion
+  ground truth. A synthetic/demo or research-only model yields status
+  "vision_only_acoustic_not_validated", never a fused number.
 - Invalid/absent acoustic evidence NEVER produces a confident fused number:
   the result falls back to vision-only with status
   "vision_only_audio_unreliable".
@@ -16,10 +19,27 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
+from src.common.contracts import acoustic_grading_eligible
+
 ACOUSTIC_WEIGHT = 0.35
 VISION_WEIGHT = 0.65
 DISAGREEMENT_GAP = 0.45
 UNCERTAIN_LABELS = {"uncertain"}
+
+
+def _vision_defect_score(vision: Dict[str, Any]) -> Optional[float]:
+    """Vision "defect pressure" in [0, 1], or None when not derivable.
+
+    The attribute model does **not** emit a freshness score (no longitudinal
+    labels exist), so fusion uses the max of the modelled defect/quality
+    probabilities instead of inventing a number.
+    """
+    defects = vision.get("defects") or {}
+    probs = [float(d.get("confidence", 0.0)) for d in defects.values()
+             if isinstance(d, dict)]
+    if not probs:
+        return None
+    return max(probs)
 
 
 def fuse_results(vision_result: Dict[str, Any],
@@ -31,11 +51,14 @@ def fuse_results(vision_result: Dict[str, Any],
     """
     warnings: list[str] = list(vision_result.get("warnings", []))
 
+    acoustic_eligible = acoustic_grading_eligible(acoustic_result)
+
     if not vision_result.get("is_onion", False):
         return {
             "is_onion": False,
             "final": {"label": "not_onion", "freshness_score": None,
                       "reason": "no onion detected in the image"},
+            "acoustic_eligible": acoustic_eligible,
             "warnings": warnings,
         }
 
@@ -44,21 +67,36 @@ def fuse_results(vision_result: Dict[str, Any],
     v_label = vision.get("label", "uncertain")
 
     # ---- Vision-only path -------------------------------------------------
-    if not acoustic_result or acoustic_result.get("status") != "valid":
-        status = "vision_only_audio_unreliable" if acoustic_result else "vision_only"
-        if acoustic_result:
+    if not acoustic_eligible:
+        if not acoustic_result:
+            status = "vision_only"
+            acoustic_reason = "acoustic evidence absent"
+        elif str(acoustic_result.get("status")) != "valid":
+            status = "vision_only_audio_unreliable"
+            acoustic_reason = f"acoustic status '{acoustic_result.get('status')}'"
             warnings.append(
                 f"acoustic status was '{acoustic_result.get('status')}'; "
                 "falling back to vision-only result")
-        final_score = None if v_label in UNCERTAIN_LABELS else round(
-            float(vision.get("freshness_score", 0.0)), 3)
-        acoustic_reason = ("acoustic evidence absent" if not acoustic_result
-                           else f"acoustic status "
-                                f"'{acoustic_result.get('status')}'")
+        else:
+            # Recording was fine, but the model is not validated (synthetic /
+            # research-only). It is reported, never fused.
+            status = "vision_only_acoustic_not_validated"
+            acoustic_reason = ("acoustic model has no verified onion ground "
+                               "truth; not used for grading")
+            warnings.append(
+                "acoustic evidence is research-only (dataset_type="
+                f"{acoustic_result.get('dataset_type') or 'unknown'}); it "
+                "cannot change the grading result")
+        # freshness_score is only produced when a model actually emits one.
+        raw_freshness = vision.get("freshness_score")
+        final_score = (round(float(raw_freshness), 3)
+                       if raw_freshness is not None
+                       and v_label not in UNCERTAIN_LABELS else None)
         return {
             "is_onion": True,
             "vision": vision,
             "acoustic": acoustic_result or None,
+            "acoustic_eligible": False,
             "final": {
                 "label": "needs_manual_review" if v_label in UNCERTAIN_LABELS else v_label,
                 "freshness_score": final_score,
@@ -74,13 +112,17 @@ def fuse_results(vision_result: Dict[str, Any],
     # ---- Fusion path ------------------------------------------------------
     prob = float(acoustic_result["internal_defect_probability"])
     a_conf = float(acoustic_result["confidence"])
-    vision_defect_score = v_conf if v_label in {"damaged", "sprouted", "undersized",
-                                                "visibly_rotten", "uncertain"} else 0.0
+    vision_defect_score = _vision_defect_score(vision)
 
-    # Weighted freshness: acoustic defect probability pulls the score down.
-    acoustic_penalty = ACOUSTIC_WEIGHT * prob
-    vision_component = (1.0 - ACOUSTIC_WEIGHT) * float(vision.get("freshness_score", 0.0))
-    fused_score = round(max(0.0, min(1.0, vision_component - acoustic_penalty)), 3)
+    # A fused freshness score is emitted ONLY when both sources provide a
+    # comparable quantity. Vision has no freshness output, so the fused score
+    # is None unless the caller supplies a real vision freshness score.
+    raw_freshness = vision.get("freshness_score")
+    fused_score: Optional[float] = None
+    if raw_freshness is not None and vision_defect_score is not None:
+        fused_score = round(max(0.0, min(1.0,
+                                       VISION_WEIGHT * float(raw_freshness)
+                                       - ACOUSTIC_WEIGHT * prob)), 3)
 
     label = "sound"
     reason = "vision and acoustic evidence agree the onion is sound"
@@ -99,6 +141,7 @@ def fuse_results(vision_result: Dict[str, Any],
             "is_onion": True,
             "vision": vision,
             "acoustic": acoustic_result,
+            "acoustic_eligible": True,
             "final": {
                 "label": "needs_manual_review",
                 "freshness_score": None,
@@ -116,13 +159,22 @@ def fuse_results(vision_result: Dict[str, Any],
         warnings.append(
             f"acoustic confidence {a_conf} is low; result weighted toward vision")
 
+    if fused_score is None:
+        warnings.append(
+            "freshness_score is null: no vision freshness model exists, so no "
+            "combined score is synthesised. Attribute probabilities and the "
+            "defect confidence are reported instead.")
+
     return {
         "is_onion": True,
         "vision": vision,
         "acoustic": acoustic_result,
+        "acoustic_eligible": True,
         "final": {
             "label": label,
             "freshness_score": fused_score,
+            "visible_defect_score": (round(vision_defect_score, 4)
+                                     if vision_defect_score is not None else None),
             "reason": reason,
             "vision_confidence": v_conf,
             "acoustic_confidence": a_conf,

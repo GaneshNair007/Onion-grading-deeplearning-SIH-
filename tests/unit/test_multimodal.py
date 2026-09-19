@@ -12,7 +12,7 @@ import numpy as np
 import pytest
 from scipy.io import wavfile
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.append(str(PROJECT_ROOT))
 sys.path.append(str(PROJECT_ROOT / "inference"))
 
@@ -167,17 +167,35 @@ def test_split_ratios_respected():
 
 
 # ---------------------------------------------------------------- fusion
-def _vision(label="sound", conf=0.9, is_onion=True, freshness=0.8):
+#: Defect confidences are part of the contract: fusion derives its "defect
+#: pressure" from them rather than from a freshness number that no current
+#: model emits (see src/fusion/fusion.py).
+_DEFAULT_DEFECTS = {
+    "rotten": {"detected": False, "confidence": 0.05},
+    "sprout": {"detected": False, "confidence": 0.05},
+}
+
+
+def _vision(label="sound", conf=0.9, is_onion=True, freshness=0.8,
+            defects=None):
     return {"is_onion": is_onion,
-            "vision": {"label": label, "confidence": conf, "defects": {},
+            "vision": {"label": label, "confidence": conf,
+                       "defects": defects if defects is not None else _DEFAULT_DEFECTS,
                        "freshness_score": freshness,
                        "model_version": "vision-test"},
             "warnings": []}
 
 
-def _acoustic(status="valid", prob=0.1, conf=0.9):
+def _acoustic(status="valid", prob=0.1, conf=0.9, verified=True, dataset_type=None):
+    """Acoustic contract. `verified=True` declares the ONLY state in which
+    acoustic evidence may influence a grade (see src/common/contracts.py)."""
+    types = dataset_type or (["verified_onion_acoustic"] if verified
+                             else ["synthetic"])
     return {"status": status, "internal_defect_probability": prob,
-            "confidence": conf, "model_version": "acoustic-test"}
+            "confidence": conf, "model_version": "acoustic-test",
+            "dataset_type": types,
+            "ground_truth_verified": "verified_onion_acoustic" in types,
+            "research_only": "verified_onion_acoustic" not in types}
 
 
 def test_non_onion_rejection():
@@ -220,10 +238,38 @@ def test_fused_score_combines_evidence():
     assert out["status"] == "fused"
 
 
+def test_no_fused_score_is_synthesised_without_a_vision_freshness_model():
+    """The real vision model emits freshness_score=None; fusion must not invent one."""
+    out = fuse_results(_vision(freshness=None), _acoustic(prob=0.4, conf=0.9))
+    assert out["final"]["freshness_score"] is None
+    assert out["final"]["visible_defect_score"] is not None
+    assert any("freshness_score is null" in w for w in out["warnings"])
+
+
 def test_low_confidence_acoustic_never_silent():
     out = fuse_results(_vision(), _acoustic(prob=0.2, conf=0.3))
     assert out["status"] == "fused"
     assert any("confidence" in w and "low" in w for w in out["warnings"])
+
+
+# ------------------------------------------- research-only acoustic safety
+def test_synthetic_acoustic_cannot_produce_a_fused_result():
+    """A synthetic/demo model must never take part in fusion (Phase K)."""
+    out = fuse_results(_vision(label="sound", conf=0.9),
+                       _acoustic(prob=0.99, conf=0.99, verified=False))
+    assert out["status"] == "vision_only_acoustic_not_validated"
+    assert out["acoustic_eligible"] is False
+    assert out["final"]["label"] == "sound"
+    assert any("research-only" in w for w in out["warnings"])
+
+
+def test_acoustic_without_verified_metadata_is_not_eligible():
+    """Absent metadata is not evidence: silence must not authorise grading."""
+    bare = {"status": "valid", "internal_defect_probability": 0.9,
+            "confidence": 0.9}
+    out = fuse_results(_vision(), bare)
+    assert out["status"] == "vision_only_acoustic_not_validated"
+    assert out["acoustic_eligible"] is False
 
 
 # ------------------------------------------------- inference integrations
@@ -257,33 +303,27 @@ def test_acoustic_inference_with_demo_model(demo_wav):
         assert any("SYNTHETIC" in w for w in result["warnings"])
 
 
-def test_vision_inference_contract():
+def test_vision_inference_contract(real_onion_image):
+    """Contract test against a real dataset photograph (no untracked folders)."""
     from vision_inference import classify_vision
-    images = sorted((PROJECT_ROOT / "Onion Grading.v7i.coco-segmentation" / "train").glob("*.jpg"))
-    if not images:
-        pytest.skip("COCO train images not present")
     try:
-        result = classify_vision(str(images[0]))
+        result = classify_vision(str(real_onion_image))
     except RuntimeError as exc:
-        pytest.skip(f"torch import unavailable in this environment: {exc}")
-    assert isinstance(result["is_onion"], bool)
-    assert result["vision"]["label"] in {"sound", "damaged", "sprouted",
-                                         "undersized", "visibly_rotten", "uncertain"}
+        pytest.skip(f"torch unavailable in this environment: {exc}")
+    if result["status"] == "model_unavailable":
+        pytest.skip("attribute artifact not present in this checkout")
+    # A 4-class commercial grade or a defect label, plus explicit uncertainty.
+    assert result["vision"]["label"] in {"sound", "sprouted", "visibly_rotten",
+                                         "reject_grade", "uncertain"}
     assert 0.0 <= result["vision"]["confidence"] <= 1.0
-    assert any("synthetic" in w.lower() for w in result["warnings"])
+    assert result["vision"]["freshness_score"] is None, (
+        "no shelf-life model exists, so none may be reported")
+    assert any("field-validated" in w for w in result["warnings"])
 
 
-def test_demo_script_end_to_end():
-    import subprocess
-    images = sorted((PROJECT_ROOT / "Onion Grading.v7i.coco-segmentation" / "train").glob("*.jpg"))
-    if not images:
-        pytest.skip("COCO train images not present")
-    proc = subprocess.run(
-        [sys.executable, str(PROJECT_ROOT / "scripts" / "demo_onion_scan.py"),
-         str(images[0]), "--compact"],
-        capture_output=True, text=True, timeout=300)
-    if proc.returncode != 0 and "torch" in (proc.stderr or "").lower():
-        pytest.skip(f"torch unavailable: {proc.stderr[:200]}")
-    assert proc.returncode == 0, proc.stderr
-    payload = json.loads(proc.stdout)
-    assert "label" in payload and "reason" in payload
+def test_legacy_demo_script_is_gone():
+    """The pre-audit demo imported untracked local folders; it must not come back."""
+    assert not (PROJECT_ROOT / "scripts" / "demo_onion_scan.py").exists(), (
+        "scripts/demo_onion_scan.py depended on an untracked dataset folder "
+        "(audit P0.1/P0.3); use scripts/demo_batch_scan.py or "
+        "scripts/demo_deep_scan.py")
