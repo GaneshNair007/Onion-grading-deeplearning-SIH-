@@ -172,7 +172,7 @@ procurement decision (enforced by tests).
 
 | Case | Status | Evidence |
 |---|---|---|
-| 1. Non-onion rejection | Working on detector gate + embedding OOD; real-world negatives (potato/tomato/hand) not yet collected — false-reject rate unknown | `tests/e2e/test_field_workflow.py::test_non_onion_short_circuits` |
+| 1. Non-onion rejection | Detector gate primary; embedding fallback now fitted from 1,500 real bulb images (`rejection_reference.npz`, machine-local — source license unresolved). Real-world negatives (potato/tomato/hand) still not collected — false-reject rate unknown | `scripts/build_rejection_reference.py`, `evaluation/rejection_reference_report.json` |
 | 2. Onion grading | Working: detector AP50 0.639 (leak-safe), rot F1 0.928, sprout F1 0.784; grades from policy engine; 4-class head research-only | `models/vision/*/model_card.json`, `evaluation/detector_comparison.json` |
 | 3. Acoustic interior | Capture + DSP pipeline real; classifier is a synthetic-data demo labelled `research_only` — it CANNOT claim internal-rot detection until real cut-open-labelled onions exist | `dataset-acoustic/README.md`, enforced by tests |
 

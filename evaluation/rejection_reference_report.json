@@ -1,0 +1,8 @@
+{
+  "n_bulb_embeddings": 1500,
+  "percentile": 99.0,
+  "threshold": 49.39632715733984,
+  "bulb_median_distance": 21.247657285679146,
+  "leaf_inlier_rate": 0.6566666666666666,
+  "license_note": "Source license unresolved: background-only embedding use; artifact is machine-local (gitignored) and rebuildable."
+}

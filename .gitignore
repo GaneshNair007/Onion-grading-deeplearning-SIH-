@@ -40,6 +40,11 @@ checkpoints/
 
 # ---- Local scratch (device offline-store data, ad-hoc runs) ----
 local_data/
+
+# OOD rejection reference is fitted from the license-unresolved
+# onion-leaves-and-bulb source (background-only embedding use).
+# Machine-local artifact: rebuild with scripts/build_rejection_reference.py
+models/vision/rejection_reference.npz
 .freebuff/
 
 # ---- Generated work lists and exported artifacts ----
