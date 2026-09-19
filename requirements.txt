@@ -1,0 +1,45 @@
+# ONION-Q — canonical Python dependencies (runtime + training).
+# Versions pinned to the set verified on the development machine
+# (audit §8). CPU-only torch is intentional: no GPU is required to run or
+# retrain anything in this repository.
+#
+#   python -m venv .venv
+#   .venv/Scripts/activate       (Windows)  |  source .venv/bin/activate
+#   pip install -r requirements.txt
+#
+# Note: installing torch from PyPI pulls the CPU or CUDA wheel automatically.
+# For a guaranteed CPU-only install use:
+#   pip install torch==2.13.0 torchvision==0.28.0 --index-url https://download.pytorch.org/whl/cpu
+
+# --- core numerics / vision ---
+numpy==2.5.2
+scipy==1.17.1
+scikit-learn==1.4.2
+pandas==2.2.2
+joblib==1.4.2
+Pillow==12.3.0
+opencv-python-headless==5.0.0.88
+torch==2.13.0
+torchvision==0.28.0
+
+# --- acoustic pipeline ---
+soundfile==0.12.1        # optional: WAV read/write beyond scipy.io.wavfile
+
+# --- API service (server/) ---
+fastapi==0.141.1
+uvicorn==0.34.0
+pydantic==2.11.0
+python-multipart==0.0.20   # multipart uploads for camera/audio endpoints
+# No ORM: server/store.py uses the standard-library sqlite3 module.
+
+# --- reporting ---
+qrcode==8.0              # QR generation for tamper-evident reports
+
+# --- model export (optional; guarded at runtime) ---
+onnxruntime==1.28.0
+# onnx==1.17.0           # only needed to *emit* .onnx files (see docs/MOBILE.md)
+
+# --- testing ---
+pytest==9.1.1
+pytest-cov==7.1.0
+httpx==0.28.1            # FastAPI TestClient transport

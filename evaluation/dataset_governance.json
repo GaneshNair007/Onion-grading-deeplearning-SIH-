@@ -1,0 +1,72 @@
+{
+  "generated_at": "2026-09-18T18:41:08.691402+00:00",
+  "manifest": "C:\\SIH\\dataset\\MANIFEST.csv",
+  "dataset_fingerprint": "2443539beb938064b6f2e1e0594c000b31da519d8f2f017b0beb878ad8c3507b",
+  "total_manifest_files": 20054,
+  "total_manifest_bytes": 1745023690,
+  "duplicate_files": 29,
+  "source_groups": [
+    {
+      "source_group": "onion-coco-mmdetection",
+      "file_count": 786,
+      "image_count": 783,
+      "annotation_file_count": 1,
+      "total_bytes": 35957280,
+      "license": "Public Domain",
+      "license_status": "verified",
+      "license_source": "Roboflow README.dataset.txt (tracked in dataset/)",
+      "training_allowed": true,
+      "redistribution_allowed": true,
+      "annotation_format": "coco_json",
+      "duplicate_files": 0,
+      "reason_for_exclusion": ""
+    },
+    {
+      "source_group": "onion-grading-coco-segmentation",
+      "file_count": 2968,
+      "image_count": 2963,
+      "annotation_file_count": 3,
+      "total_bytes": 73349356,
+      "license": "CC BY 4.0",
+      "license_status": "verified",
+      "license_source": "Roboflow README.dataset.txt (tracked in dataset/)",
+      "training_allowed": true,
+      "redistribution_allowed": true,
+      "annotation_format": "coco_json",
+      "duplicate_files": 0,
+      "reason_for_exclusion": ""
+    },
+    {
+      "source_group": "onion-leaves-and-bulb",
+      "file_count": 16300,
+      "image_count": 16300,
+      "annotation_file_count": 0,
+      "total_bytes": 1635717054,
+      "license": "License not detected",
+      "license_status": "unresolved",
+      "license_source": "No licence file in source dataset (dataset/README.md)",
+      "training_allowed": false,
+      "redistribution_allowed": false,
+      "annotation_format": "none",
+      "duplicate_files": 29,
+      "reason_for_exclusion": "Redistribution/training permission not sufficiently verified (license_status=unresolved; license: License not detected). The source also carries no COCO annotations, so it cannot be used for supervised training as packaged."
+    }
+  ],
+  "categories": {
+    "training_sources": [
+      "onion-coco-mmdetection",
+      "onion-grading-coco-segmentation"
+    ],
+    "excluded_sources": [
+      "onion-leaves-and-bulb"
+    ],
+    "unresolved_sources": [
+      "onion-leaves-and-bulb"
+    ],
+    "restricted_sources": [],
+    "auxiliary_sources": [
+      "onion-leaves-and-bulb"
+    ]
+  },
+  "statement": "A source group appears under training_sources only when its licence could be verified from bundled metadata. Groups whose rights are unresolved are listed explicitly under unresolved_sources and are never used for training."
+}

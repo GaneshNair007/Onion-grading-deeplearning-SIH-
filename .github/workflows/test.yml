@@ -1,0 +1,66 @@
+name: tests
+
+# CI runs the checks that do not need the large dataset or trained weights.
+# Dataset- and artifact-dependent tests skip themselves when the data is
+# absent (they are written that way on purpose), so a fresh checkout stays
+# green without downloading hundreds of megabytes.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          # CI-only extras: keep the runtime requirements file honest.
+          pip install pytest scipy scikit-learn joblib
+
+      - name: Reproducibility smoke test (no untracked files required)
+        run: python scripts/clean_clone_smoke_test.py
+
+      - name: Import every module
+        run: |
+          python - <<'PY'
+          import importlib
+          modules = [
+              "src.common.contracts", "src.common.version", "src.data.labels",
+              "src.data.dataset_registry", "src.data.provenance", "src.data.splits",
+              "src.grading.engine", "src.grading.policy", "src.grading.batch",
+              "src.fusion.fusion", "src.reporting.audit_hash",
+              "src.reporting.evidence", "src.reporting.generator",
+              "src.reporting.qr", "src.mobile.offline_store",
+              "src.mobile.capture_protocol", "src.vision.model",
+              "src.vision.rejection", "src.vision.size", "src.vision.detector",
+              "src.vision.capture_quality", "src.vision.multi_view",
+              "src.acoustic.loading", "src.acoustic.quality", "src.acoustic.features",
+              "inference.vision_inference", "inference.acoustic_inference",
+              "inference.batch_scan", "inference.deep_scan", "server.app",
+          ]
+          for name in modules:
+              importlib.import_module(name)
+              print("ok", name)
+          PY
+
+      - name: Unit + integration + contract tests
+        run: python -m pytest tests server/tests -q -m "not slow"
+
+      - name: Grading / report-integrity gate
+        run: |
+          python -m pytest \
+            tests/grading tests/unit/test_report_integrity.py \
+            tests/e2e/test_production_safety.py -q
