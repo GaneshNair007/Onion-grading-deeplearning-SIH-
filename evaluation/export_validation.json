@@ -1,0 +1,64 @@
+{
+  "generated_at": "2026-09-19T14:44:21.623502+00:00",
+  "host": {
+    "platform": "Windows 11",
+    "processor": "AMD64 Family 25 Model 68 Stepping 1, AuthenticAMD"
+  },
+  "models": {
+    "detector": {
+      "status": "exported",
+      "artifact": "C:\\SIH\\models\\onnx\\detector.onnx",
+      "artifact_mb": 76.04,
+      "source_weights": "C:\\SIH\\models\\vision\\detector\\last.pt",
+      "opset": 17,
+      "parity": {
+        "compared_boxes": 1,
+        "max_abs_diff_scores": 0.0,
+        "max_abs_diff_boxes": 2.3e-05,
+        "note": "Boxes/scores are produced by non-maximum suppression, which ONNX Runtime and PyTorch implement independently; counts may differ slightly even when the model is numerically identical.",
+        "torch_n_boxes": 1,
+        "onnx_n_boxes": 1,
+        "parity_input": "C:\\SIH\\dataset\\part-002\\onion-grading-coco-segmentation\\valid\\Class-1-Extra-Large-7-5-Slight-Shape-Defect-10-_jpg.rf.b45514b112c0d0380fbac29da0ccf702.jpg"
+      },
+      "onnxruntime_cpu": {
+        "n": 5,
+        "median_ms": 24.4,
+        "p95_ms": 30.7
+      },
+      "onnxruntime_version": "1.28.0"
+    },
+    "attribute": {
+      "status": "exported",
+      "artifact": "C:\\SIH\\models\\vision\\attributes\\attributes_v0.1_128px.onnx",
+      "artifact_mb": 4.31,
+      "source_weights": "C:\\SIH\\models\\vision\\attributes\\attributes_v0.1_128px.pt",
+      "opset": 17,
+      "parity": {
+        "max_abs_diff_quality_head": 3e-06,
+        "shape_quality_torch": [
+          1,
+          4
+        ],
+        "shape_quality_onnx": [
+          1,
+          4
+        ],
+        "max_abs_diff_binary_head": 5e-06,
+        "shape_binary_torch": [
+          1,
+          2
+        ],
+        "shape_binary_onnx": [
+          1,
+          2
+        ]
+      },
+      "onnxruntime_cpu": {
+        "n": 5,
+        "median_ms": 1.5,
+        "p95_ms": 1.7
+      }
+    }
+  },
+  "statement": "Each export is compared against its PyTorch source on identical inputs; a difference is reported, not hidden."
+}

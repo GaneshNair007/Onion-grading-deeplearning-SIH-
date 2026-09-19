@@ -1,0 +1,24 @@
+{
+  "artifact": "models\\vision\\attributes\\attributes_v0.1_128px.pt",
+  "threshold": 0.98,
+  "n_train_reference": 300,
+  "splits": {
+    "test": {
+      "n": 292,
+      "nn_similarity_mean": 0.8822,
+      "nn_similarity_median": 0.9104,
+      "nn_similarity_p90": 0.9559,
+      "near_duplicate_rate": 0.0103,
+      "example_near_duplicates": 3
+    },
+    "valid": {
+      "n": 291,
+      "nn_similarity_mean": 0.9824,
+      "nn_similarity_median": 0.9986,
+      "nn_similarity_p90": 0.9992,
+      "near_duplicate_rate": 0.8522,
+      "example_near_duplicates": 248
+    }
+  },
+  "interpretation": "A near-duplicate rate far above chance in 'valid' while 'test' is low indicates the official valid split shares content with train - which makes valid-set metrics optimistic and test-set metrics the honest reference."
+}

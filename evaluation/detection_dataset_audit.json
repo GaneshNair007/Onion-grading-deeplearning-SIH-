@@ -1,0 +1,139 @@
+{
+  "generated_at": "2026-09-18T18:42:12.066836+00:00",
+  "dataset_fingerprint": "2443539beb938064b6f2e1e0594c000b31da519d8f2f017b0beb878ad8c3507b",
+  "sources": [
+    "onion-coco-mmdetection",
+    "onion-grading-coco-segmentation"
+  ],
+  "source_split_counts": {
+    "onion-coco-mmdetection/train": 783,
+    "onion-grading-coco-segmentation/test": 292,
+    "onion-grading-coco-segmentation/train": 2380,
+    "onion-grading-coco-segmentation/valid": 291
+  },
+  "category_counts": {
+    "rotten": 1386,
+    "sprout": 918,
+    "Class 2": 1208,
+    "Class 1": 702,
+    "Extra Class": 688,
+    "Reject": 391
+  },
+  "geometry": {
+    "images": 3746,
+    "images_with_zero_boxes": 0,
+    "annotations": 5293,
+    "usable_boxes": 5291,
+    "degenerate_boxes": 2,
+    "degenerate_by_reason": {
+      "tiny_area": 2
+    },
+    "box_width_px": {
+      "n": 5291,
+      "min": 8.0,
+      "p05": 50.0,
+      "median": 115.2,
+      "p95": 282.0,
+      "max": 446.0,
+      "mean": 127.653
+    },
+    "box_height_px": {
+      "n": 5291,
+      "min": 10.0,
+      "p05": 48.0,
+      "median": 178.0,
+      "p95": 312.0,
+      "max": 476.0,
+      "mean": 170.132
+    },
+    "box_aspect_ratio": {
+      "n": 5291,
+      "min": 0.123,
+      "p05": 0.364,
+      "median": 0.759,
+      "p95": 1.761,
+      "max": 7.579,
+      "mean": 0.86
+    },
+    "box_area_fraction": {
+      "n": 5291,
+      "min": 0.001,
+      "p05": 0.007,
+      "median": 0.069,
+      "p95": 0.268,
+      "max": 0.487,
+      "mean": 0.086
+    },
+    "annotations_with_polygon_mask": 2989,
+    "iscrowd_annotations": 0,
+    "images_with_masks": 2963
+  },
+  "duplicate_annotations": {
+    "count": 2,
+    "iou_threshold": 0.95,
+    "examples": [
+      {
+        "file_name": "Extra-Class-Large-5-5cm-4-_jpg.rf.1754a80080ede3f930739eb723940560.jpg",
+        "source": "onion-grading-coco-segmentation",
+        "iou": 1.0,
+        "categories": [
+          "Extra Class",
+          "Class 1"
+        ]
+      },
+      {
+        "file_name": "image_103_jpg.rf.f28bd7a78e7c7a2d99d6990debda16b0.jpg",
+        "source": "onion-grading-coco-segmentation",
+        "iou": 0.9754,
+        "categories": [
+          "Extra Class",
+          "Reject"
+        ]
+      }
+    ]
+  },
+  "notes": [
+    "Boxes are COCO [x, y, w, h] in original image pixels.",
+    "Degenerate boxes are dropped by the detector training loader, not silently relabelled.",
+    "Duplicate annotations are reported, not deleted from the source dataset; the loader keeps them."
+  ],
+  "near_duplicate_grouping": {
+    "n_images": 3746,
+    "n_groups": 2272,
+    "counts": {
+      "train": 2622,
+      "validation": 562,
+      "test": 562
+    },
+    "singleton_groups": 2166,
+    "largest_group": 219,
+    "threshold": 0.98,
+    "groups_spanning_splits": 0,
+    "leakage_check": "pass",
+    "source_distribution": {
+      "train": {
+        "onion-coco-mmdetection": 391,
+        "onion-grading-coco-segmentation": 2231
+      },
+      "validation": {
+        "onion-coco-mmdetection": 211,
+        "onion-grading-coco-segmentation": 351
+      },
+      "test": {
+        "onion-coco-mmdetection": 181,
+        "onion-grading-coco-segmentation": 381
+      }
+    },
+    "box_distribution": {
+      "train": 3374,
+      "validation": 993,
+      "test": 926
+    },
+    "official_split_for_comparison": {
+      "onion-coco-mmdetection/train": 783,
+      "onion-grading-coco-segmentation/test": 292,
+      "onion-grading-coco-segmentation/train": 2380,
+      "onion-grading-coco-segmentation/valid": 291
+    }
+  }
+}

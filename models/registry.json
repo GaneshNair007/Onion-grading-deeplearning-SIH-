@@ -1,0 +1,222 @@
+{
+  "registry_version": "1.0.0",
+  "generated_at": "2026-09-19T14:54:49.590821+00:00",
+  "git_commit": "2e281484a584b4b93c29a556204ac08315c873e1",
+  "statement": "Generated from on-disk artifacts and model cards. An absent entry means the artifact is genuinely missing (for example because it is not committed or has not been trained yet) \u2014 never that it exists.",
+  "models": {
+    "vision-attributes-v0.1": {
+      "model_id": "vision-attributes-v0.1",
+      "task": "onion_visible_attribute_classification",
+      "status": "validated_baseline",
+      "architecture": "MobileNetV3-Small + quality_class head + binary head",
+      "artifact_path": "models/vision/attributes/attributes_v0.1_128px.pt",
+      "model_card": "models/vision/attributes/model_card.json",
+      "metrics_file": "models/vision/attributes/metrics.json",
+      "input_size": [
+        128,
+        128
+      ],
+      "dataset_fingerprint": "2443539beb938064b6f2e1e0594c000b31da519d8f2f017b0beb878ad8c3507b",
+      "dataset_type": null,
+      "trained_at": "2026-09-18",
+      "git_commit": "2e281484a584b4b93c29a556204ac08315c873e1",
+      "split_mode": "grouped",
+      "split_strategy": null,
+      "metrics_confidence": "leak_free",
+      "metrics_trustworthy": true,
+      "entry_point": "inference/vision_inference.py::classify_vision",
+      "license_notes": "Training data licences: dataset/LICENSES_AND_SOURCES.md",
+      "limitations": [
+        "Quality classes are the Roboflow commercial grades, not a verified government standard.",
+        "Binary defect labels come from one source and one annotation protocol.",
+        "No negative (non-onion) images were used; rejection is handled separately.",
+        "CPU training on the available data; not field-validated.",
+        "damaged/undersized/bruising/shelf-life are NOT modelled (no labels exist).",
+        "The published 'valid' split leaks near-duplicates of train (85.2% measured); grouped-split metrics are the honest reference."
+      ],
+      "metrics": {
+        "split_mode": "grouped",
+        "split_counts": {
+          "train": 2622,
+          "validation": 562,
+          "test": 562
+        },
+        "quality_test": {
+          "accuracy": 0.3176,
+          "macro_f1": 0.312,
+          "n": 381,
+          "per_head": {
+            "per_class": {}
+          }
+        },
+        "quality_valid": {
+          "accuracy": 0.3048,
+          "macro_f1": 0.2959,
+          "n": 351,
+          "per_head": {
+            "per_class": {}
+          }
+        },
+        "defects_val_mmdet_carveout": {
+          "per_head": {
+            "rotten": {
+              "precision": 0.9854,
+              "recall": 0.8766,
+              "f1": 0.9278,
+              "positives": 154,
+              "support": 211,
+              "roc_auc": 0.9749
+            },
+            "sprout": {
+              "precision": 0.8276,
+              "recall": 0.7442,
+              "f1": 0.7837,
+              "positives": 129,
+              "support": 211,
+              "roc_auc": 0.8662
+            }
+          }
+        }
+      }
+    },
+    "vision-detector-v0.2": {
+      "model_id": "vision-detector-v0.2",
+      "task": "onion_instance_detection",
+      "status": "experimental",
+      "architecture": "torchvision fasterrcnn_mobilenet_v3_large_320_fpn",
+      "artifact_path": "models/vision/detector/best.pt",
+      "model_card": "models/vision/detector/model_card.json",
+      "metrics_file": "models/vision/detector/metrics.json",
+      "input_size": [
+        320,
+        320
+      ],
+      "dataset_fingerprint": "2443539beb938064b6f2e1e0594c000b31da519d8f2f017b0beb878ad8c3507b",
+      "dataset_type": null,
+      "trained_at": "2026-09-19",
+      "git_commit": "2e281484a584b4b93c29a556204ac08315c873e1",
+      "split_mode": "grouped_leak_safe",
+      "split_strategy": "grouped_leak_safe",
+      "metrics_confidence": "leak_free",
+      "metrics_trustworthy": true,
+      "entry_point": "src/vision/detector.py::detect_onions",
+      "license_notes": "Training data licences: dataset/LICENSES_AND_SOURCES.md",
+      "limitations": [
+        "Single-class (onion) detector; no non-onion object classes trained.",
+        "CPU training; not field-validated on procurement hardware.",
+        "Metrics are valid only on the leak-safe grouped split recorded here.",
+        "No mobile latency measured (desktop CPU only)."
+      ],
+      "metrics": {
+        "test": {
+          "AP@0.50": 0.6388,
+          "AP@0.75": 0.439,
+          "AP@0.50:0.95": 0.4101,
+          "precision@0.5score": 0.7449,
+          "recall@0.5score": 0.5864,
+          "f1@0.5score": 0.6562,
+          "tp": 543,
+          "fp": 186,
+          "fn": 383,
+          "score_threshold": 0.5,
+          "n_images": 562,
+          "n_gt_boxes": 926,
+          "per_head": {
+            "pr_curve": {
+              "iou_threshold": 0.5,
+              "n_gt": 926
+            }
+          }
+        },
+        "validation": {
+          "AP@0.50": 0.589,
+          "AP@0.75": 0.3726,
+          "AP@0.50:0.95": 0.3623,
+          "precision@0.5score": 0.7124,
+          "recall@0.5score": 0.5337,
+          "f1@0.5score": 0.6102,
+          "tp": 530,
+          "fp": 214,
+          "fn": 463,
+          "score_threshold": 0.5,
+          "n_images": 562,
+          "n_gt_boxes": 993,
+          "per_head": {
+            "pr_curve": {
+              "iou_threshold": 0.5,
+              "n_gt": 993
+            }
+          }
+        }
+      }
+    },
+    "vision-detector-baseline-v1": {
+      "model_id": "vision-detector-baseline-v1",
+      "task": "onion_instance_detection",
+      "status": "deprecated",
+      "architecture": "torchvision fasterrcnn_mobilenet_v3_large_320_fpn",
+      "artifact_path": "models/vision/detector-baseline-v1/detector_v0.1_cpu.pt",
+      "model_card": "models/vision/detector-baseline-v1/model_card.json",
+      "metrics_file": "models/vision/detector-baseline-v1/metrics.json",
+      "input_size": [
+        480,
+        480
+      ],
+      "dataset_fingerprint": "2443539beb938064b6f2e1e0594c000b31da519d8f2f017b0beb878ad8c3507b",
+      "dataset_type": null,
+      "trained_at": "2026-09-18",
+      "git_commit": "2e281484a584b4b93c29a556204ac08315c873e1",
+      "split_mode": "official",
+      "split_strategy": null,
+      "metrics_confidence": "source_split_may_leak",
+      "metrics_trustworthy": false,
+      "entry_point": "src/vision/detector.py::detect_onions",
+      "license_notes": "Training data licences: dataset/LICENSES_AND_SOURCES.md",
+      "limitations": [
+        "Single-class (onion) detector; no non-onion object classes trained.",
+        "CPU training on a small labelled set; weights are COCO-pretrained + fine-tuned.",
+        "Image level splits follow the source datasets; augmented siblings cannot be fully ruled out.",
+        "No mobile latency measured yet (desktop CPU latency only)."
+      ],
+      "metrics": {
+        "test": {
+          "AP@0.50": 0.2562,
+          "AP@0.75": 0.0084,
+          "AP@0.50:0.95": 0.0806,
+          "precision@0.5score": 0.3243,
+          "recall@0.5score": 0.3,
+          "f1@0.5score": 0.3117,
+          "tp": 12,
+          "fp": 25,
+          "fn": 28,
+          "score_threshold": 0.5,
+          "n_images": 40,
+          "n_gt_boxes": 40
+        }
+      }
+    },
+    "acoustic-v1-synthetic-demo": {
+      "model_id": "acoustic-v1-synthetic-demo",
+      "task": "impact_acoustic_internal_condition_PROVISIONAL",
+      "status": "research_only",
+      "architecture": "see model_card.json",
+      "artifact_path": "models/acoustic/acoustic_baseline.joblib",
+      "model_card": "models/acoustic/model_card.json",
+      "metrics_file": null,
+      "input_size": null,
+      "dataset_fingerprint": null,
+      "dataset_type": null,
+      "trained_at": null,
+      "git_commit": "2e281484a584b4b93c29a556204ac08315c873e1",
+      "split_mode": "unknown",
+      "split_strategy": null,
+      "metrics_confidence": "synthetic_demo_no_real_ground_truth",
+      "metrics_trustworthy": false,
+      "entry_point": "inference/acoustic_inference.py::classify_acoustic",
+      "license_notes": "Training data licences: dataset/LICENSES_AND_SOURCES.md",
+      "limitations": [],
+      "metrics": null
+    }
+  },
+  "not_available": []
+}

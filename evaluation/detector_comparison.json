@@ -1,0 +1,117 @@
+{
+  "generated_at": "2026-09-19T15:20:00+00:00",
+  "generated_by": "manual consolidation of on-disk metrics.json files; no numbers transcribed from memory",
+  "selection_metric": "AP@0.50:0.95 on the leak-safe grouped test split",
+  "decision": "vision-detector-v0.2 is promoted to the working detector; baseline v1 preserved and re-scored for comparability",
+  "warning": "The baseline's official-split numbers (AP50 0.256 on 40 images) and the leak-safe-split numbers below are NOT directly comparable - different data, different size, different difficulty. The apples-to-apples rows are the two leak-safe-split entries.",
+  "candidates": [
+    {
+      "model_id": "vision-detector-v0.1",
+      "role": "baseline (preserved, immutable)",
+      "architecture": "torchvision fasterrcnn_mobilenet_v3_large_320_fpn",
+      "artifact": "models/vision/detector-baseline-v1/detector_v0.1_cpu.pt",
+      "artifact_size_mb": 76.02,
+      "training": {
+        "train_images": 240,
+        "epochs": 4,
+        "batch_size": 2,
+        "lr": 0.0005,
+        "min_size": 480,
+        "split_kind": "official_source_splits (leak-prone)",
+        "device": "cpu"
+      },
+      "metrics_official_split": {
+        "split": "official test (40 images / 40 boxes)",
+        "AP@0.50": 0.2562,
+        "AP@0.75": 0.0084,
+        "AP@0.50:0.95": 0.0806,
+        "precision@0.5": 0.3243,
+        "recall@0.5": 0.3,
+        "f1@0.5": 0.3117
+      },
+      "metrics_leak_safe_split": {
+        "split": "grouped leak-safe test (562 images / 926 boxes)",
+        "AP@0.50": 0.1339,
+        "AP@0.75": 0.0007,
+        "AP@0.50:0.95": 0.0303,
+        "precision@0.5": 0.235,
+        "recall@0.5": 0.1857,
+        "f1@0.5": 0.2075,
+        "evaluated_by": "training/train_detector.py --eval-only --weights models/vision/detector-baseline-v1/detector_v0.1_cpu.pt --split-file evaluation/detection_split.json",
+        "metrics_file": "models/vision/detector-baseline-v1/eval_on_leak_safe/metrics.json",
+        "gallery_dir": "evaluation/baseline_eval_gallery"
+      },
+      "cpu_latency_ms": 113.0,
+      "status": "deprecated (superseded by v0.2; kept for auditability)"
+    },
+    {
+      "model_id": "vision-detector-v0.2",
+      "role": "promoted working detector",
+      "architecture": "torchvision fasterrcnn_mobilenet_v3_large_320_fpn",
+      "artifact": "models/vision/detector/best.pt",
+      "artifact_size_mb": 76.0,
+      "training": {
+        "train_images": 2622,
+        "epochs": 8,
+        "batch_size": 4,
+        "lr": 0.0002,
+        "min_size": 320,
+        "split_kind": "grouped_leak_safe",
+        "dataset_fingerprint": "2443539beb938064b6f2e1e0594c000b31da519d8f2f017b0beb878ad8c3507b",
+        "wall_seconds": 4347.8,
+        "device": "cpu"
+      },
+      "metrics_leak_safe_split": {
+        "split": "grouped leak-safe test (562 images / 926 boxes)",
+        "AP@0.50": 0.6388,
+        "AP@0.75": 0.439,
+        "AP@0.50:0.95": 0.4101,
+        "precision@0.5": 0.7449,
+        "recall@0.5": 0.5864,
+        "f1@0.5": 0.6562,
+        "metrics_file": "models/vision/detector/metrics.json"
+      },
+      "operating_point": {
+        "recommended_score_threshold": 0.7,
+        "precision": 0.8581,
+        "recall": 0.4935,
+        "f1": 0.6266,
+        "note": "chosen by validation F1; tray deployment may prefer a lower threshold inside a review zone - thresholds are policy, not model constants"
+      },
+      "cpu_latency_ms": 133.1,
+      "cpu_latency_p95_ms": 420.7,
+      "error_gallery": {
+        "dir": "evaluation/detector_gallery",
+        "false_positives": 37,
+        "false_negatives": 136,
+        "localisation_errors": 136
+      },
+      "status": "experimental (better than baseline on identical data, but not field-validated)"
+    }
+  ],
+  "verdict": "v0.2 beats the baseline on every metric on the identical leak-safe test split (AP@0.50:0.95 0.410 vs 0.030). The improvement is driven mostly by 10.9x more training images and the leak-free split, not by an architecture change. No framework switch (YOLO) was evaluated: ultralytics is unavailable and licence-distinct; torchvision remains the reproducible, BSD-licensed choice.",
+  "export": {
+    "report": "evaluation/export_validation.json",
+    "detector": {
+      "status": "exported",
+      "onnx_artifact": "models/onnx/detector.onnx",
+      "size_mb": 76.04,
+      "onnxruntime_cpu_median_ms": 24.4,
+      "pytorch_cpu_median_ms": 133.1,
+      "speedup": "5.5x on this host",
+      "parity": "scores identical (0.0), boxes max diff 2.3e-05 px on a real dataset image, 1/1 boxes matched"
+    },
+    "attribute": {
+      "status": "exported",
+      "onnx_artifact": "models/vision/attributes/attributes_v0.1_128px.onnx",
+      "size_mb": 4.31,
+      "onnxruntime_cpu_median_ms": 1.5,
+      "parity": "max abs diff 3e-06 (quality head), 5e-06 (binary head)"
+    }
+  },
+  "next_experiments": [
+    "annotate tray scenes with genuine occlusion (current FP/FN galleries show crowding is the dominant failure)",
+    "instance segmentation head from the 2963 polygon-mask images",
+    "ONNX Runtime Mobile latency on an actual Android device before any mobile claim"
+  ]
+}

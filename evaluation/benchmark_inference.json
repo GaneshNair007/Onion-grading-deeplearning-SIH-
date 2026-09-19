@@ -1,0 +1,56 @@
+{
+  "generated_at": "2026-09-19T14:48:44.839025+00:00",
+  "host": {
+    "platform": "Windows 11",
+    "processor": "AMD64 Family 25 Model 68 Stepping 1, AuthenticAMD",
+    "python": "3.12.10"
+  },
+  "components": {
+    "detector": {
+      "status": "success",
+      "artifact": "C:\\SIH\\models\\vision\\detector\\last.pt",
+      "warm_loop": {
+        "n": 3,
+        "median_ms": 89.1,
+        "mean_ms": 90.6,
+        "p95_ms": 95.7,
+        "min_ms": 86.8,
+        "max_ms": 95.7
+      },
+      "per_image": {
+        "n": 10,
+        "median_ms": 106.4,
+        "p95_ms": 136.4
+      },
+      "onions_detected_in_first_image": 1
+    },
+    "attribute_classifier": {
+      "status": "measured",
+      "artifact": "C:\\SIH\\models\\vision\\attributes\\attributes_v0.1_128px.pt",
+      "image": "C:\\SIH\\dataset\\part-001\\onion-coco-mmdetection\\train\\img_tr17_png_jpg.rf.f4488a073a54a058f0fa3a5b585786c9.jpg",
+      "warm_loop": {
+        "n": 3,
+        "median_ms": 37.3,
+        "mean_ms": 83.7,
+        "p95_ms": 178.7,
+        "min_ms": 35.1,
+        "max_ms": 178.7
+      }
+    },
+    "batch_end_to_end": {
+      "images": [
+        "C:\\SIH\\demo\\tray_calibrated.png"
+      ],
+      "onions_detected": 7,
+      "total_ms": 1061.9,
+      "ms_per_onion": 151.7,
+      "onions_per_second": 6.592,
+      "note": "End-to-end includes detection, cropping, attribute classification and the policy engine."
+    }
+  },
+  "notes": [
+    "Desktop CPU measurements only \u2014 no phone or edge device has been benchmarked, so no mobile latency claim is made.",
+    "timing includes image decoding, which is part of a real request."
+  ],
+  "statement": "Latency is reported with sample counts and hardware. No mobile figure exists, and 'real-time' is a claim this project does not make without device measurements."
+}
