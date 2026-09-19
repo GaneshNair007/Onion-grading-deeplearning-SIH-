@@ -1,0 +1,149 @@
+{
+  "model_id": "vision-detector-v0.1",
+  "task": "onion_instance_detection",
+  "architecture": "torchvision fasterrcnn_mobilenet_v3_large_320_fpn",
+  "classes": {
+    "0": "background",
+    "1": "onion"
+  },
+  "dataset_fingerprint": "2443539beb938064b6f2e1e0594c000b31da519d8f2f017b0beb878ad8c3507b",
+  "trained_at": "2026-09-18",
+  "artifact_path": "models\\vision\\detector\\detector_v0.1_cpu.pt",
+  "artifact_size_mb": 76.02,
+  "cpu_latency_ms_per_image": 116.9,
+  "host": "Windows 11 / AMD64 Family 25 Model 68 Stepping 1, AuthenticAMD",
+  "metrics": {
+    "training": {
+      "epochs": 4,
+      "batch_size": 2,
+      "lr": 0.0005,
+      "min_size": 480,
+      "train_images": 240,
+      "wall_seconds": 629.4,
+      "device": "cpu",
+      "history": [
+        {
+          "epoch": 1,
+          "mean_loss": 0.409,
+          "valid": {
+            "AP@0.50": 0.0538,
+            "AP@0.75": 0.0028,
+            "AP@0.50:0.95": 0.0112,
+            "precision@0.5score": 0.0,
+            "recall@0.5score": 0.0,
+            "f1@0.5score": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 40,
+            "score_threshold": 0.5,
+            "n_images": 40,
+            "n_gt_boxes": 40
+          }
+        },
+        {
+          "epoch": 2,
+          "mean_loss": 0.4708,
+          "valid": {
+            "AP@0.50": 0.0718,
+            "AP@0.75": 0.0108,
+            "AP@0.50:0.95": 0.0259,
+            "precision@0.5score": 0.0,
+            "recall@0.5score": 0.0,
+            "f1@0.5score": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 40,
+            "score_threshold": 0.5,
+            "n_images": 40,
+            "n_gt_boxes": 40
+          }
+        },
+        {
+          "epoch": 3,
+          "mean_loss": 0.5399,
+          "valid": {
+            "AP@0.50": 0.2989,
+            "AP@0.75": 0.0433,
+            "AP@0.50:0.95": 0.1309,
+            "precision@0.5score": 1.0,
+            "recall@0.5score": 0.025,
+            "f1@0.5score": 0.0488,
+            "tp": 1,
+            "fp": 0,
+            "fn": 39,
+            "score_threshold": 0.5,
+            "n_images": 40,
+            "n_gt_boxes": 40
+          }
+        },
+        {
+          "epoch": 4,
+          "mean_loss": 0.6126,
+          "valid": {
+            "AP@0.50": 0.2126,
+            "AP@0.75": 0.006,
+            "AP@0.50:0.95": 0.057,
+            "precision@0.5score": 0.3226,
+            "recall@0.5score": 0.25,
+            "f1@0.5score": 0.2817,
+            "tp": 10,
+            "fp": 21,
+            "fn": 30,
+            "score_threshold": 0.5,
+            "n_images": 40,
+            "n_gt_boxes": 40
+          }
+        }
+      ]
+    },
+    "valid": {
+      "AP@0.50": 0.2126,
+      "AP@0.75": 0.006,
+      "AP@0.50:0.95": 0.057,
+      "precision@0.5score": 0.3226,
+      "recall@0.5score": 0.25,
+      "f1@0.5score": 0.2817,
+      "tp": 10,
+      "fp": 21,
+      "fn": 30,
+      "score_threshold": 0.5,
+      "n_images": 40,
+      "n_gt_boxes": 40
+    },
+    "test": {
+      "AP@0.50": 0.2562,
+      "AP@0.75": 0.0084,
+      "AP@0.50:0.95": 0.0806,
+      "precision@0.5score": 0.3243,
+      "recall@0.5score": 0.3,
+      "f1@0.5score": 0.3117,
+      "tp": 12,
+      "fp": 25,
+      "fn": 28,
+      "score_threshold": 0.5,
+      "n_images": 40,
+      "n_gt_boxes": 40
+    }
+  },
+  "training_data": {
+    "sources": [
+      "onion-grading-coco-segmentation",
+      "onion-coco-mmdetection"
+    ],
+    "licenses": {
+      "onion-grading-coco-segmentation": "CC BY 4.0",
+      "onion-coco-mmdetection": "Public Domain"
+    },
+    "splits": {
+      "train": "official train of both sources",
+      "valid": "official valid (grading only)",
+      "test": "official test (grading only)"
+    }
+  },
+  "limitations": [
+    "Single-class (onion) detector; no non-onion object classes trained.",
+    "CPU training on a small labelled set; weights are COCO-pretrained + fine-tuned.",
+    "Image level splits follow the source datasets; augmented siblings cannot be fully ruled out.",
+    "No mobile latency measured yet (desktop CPU latency only)."
+  ]
+}

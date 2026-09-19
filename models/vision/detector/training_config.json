@@ -1,0 +1,13 @@
+{
+  "model_id": "vision-detector-v0.2",
+  "epochs": 8,
+  "batch_size": 4,
+  "lr": 0.0002,
+  "min_size": 320,
+  "limit_train": 0,
+  "split_source": "C:\\SIH\\evaluation\\detection_split.json",
+  "split_kind": "grouped_leak_safe",
+  "patience": 3,
+  "seed": 42,
+  "dataset_fingerprint": "2443539beb938064b6f2e1e0594c000b31da519d8f2f017b0beb878ad8c3507b"
+}

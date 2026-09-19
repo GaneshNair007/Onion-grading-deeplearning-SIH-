@@ -1,0 +1,234 @@
+{
+  "model_id": "vision-attributes-v0.1-grouped",
+  "task": [
+    "quality_class",
+    "rotten",
+    "sprout"
+  ],
+  "architecture": "MobileNetV3-Small + quality_class head + binary head",
+  "dataset_fingerprint": "2443539beb938064b6f2e1e0594c000b31da519d8f2f017b0beb878ad8c3507b",
+  "split": {
+    "n_images": 3746,
+    "n_groups": 2272,
+    "counts": {
+      "train": 2622,
+      "validation": 562,
+      "test": 562
+    },
+    "singleton_groups": 2166,
+    "largest_group": 219,
+    "threshold": 0.98,
+    "mode": "grouped"
+  },
+  "trained_at": "2026-09-18",
+  "artifact_path": "models\\vision\\attributes\\attributes_v0.1_128px.pt",
+  "input_size": [
+    128,
+    128
+  ],
+  "artifact_size_mb": 4.44,
+  "cpu_latency_ms_per_image": 10.9,
+  "host": "Windows 11 / AMD64 Family 25 Model 68 Stepping 1, AuthenticAMD",
+  "metrics": {
+    "split": {
+      "n_images": 3746,
+      "n_groups": 2272,
+      "counts": {
+        "train": 2622,
+        "validation": 562,
+        "test": 562
+      },
+      "singleton_groups": 2166,
+      "largest_group": 219,
+      "threshold": 0.98,
+      "mode": "grouped"
+    },
+    "training": {
+      "epochs": 3,
+      "input_size": 128,
+      "batch_size": 32,
+      "lr": 0.0008,
+      "quality_train_n": 2231,
+      "defect_train_n": 391,
+      "wall_seconds": 35.6,
+      "device": "cpu",
+      "history": [
+        {
+          "epoch": 1,
+          "quality_loss": 0.8980394922769986,
+          "defect_loss": 0.5847112880303309
+        },
+        {
+          "epoch": 2,
+          "quality_loss": 0.4790444580408243,
+          "defect_loss": 0.35406316014436573
+        },
+        {
+          "epoch": 3,
+          "quality_loss": 0.4309124511021834,
+          "defect_loss": 0.22265851153777197
+        }
+      ]
+    },
+    "quality_valid": {
+      "accuracy": 0.3048,
+      "macro_f1": 0.2959,
+      "per_class": {
+        "extra_class": {
+          "precision": 0.2754,
+          "recall": 0.8364,
+          "f1": 0.4144,
+          "support": 55
+        },
+        "class_1": {
+          "precision": 0.3333,
+          "recall": 0.3191,
+          "f1": 0.3261,
+          "support": 94
+        },
+        "class_2": {
+          "precision": 0.2051,
+          "recall": 0.1495,
+          "f1": 0.173,
+          "support": 107
+        },
+        "reject": {
+          "precision": 0.9375,
+          "recall": 0.1579,
+          "f1": 0.2703,
+          "support": 95
+        }
+      },
+      "confusion_matrix": [
+        [
+          46,
+          7,
+          2,
+          0
+        ],
+        [
+          50,
+          30,
+          14,
+          0
+        ],
+        [
+          52,
+          38,
+          16,
+          1
+        ],
+        [
+          19,
+          15,
+          46,
+          15
+        ]
+      ],
+      "n": 351
+    },
+    "quality_test": {
+      "accuracy": 0.3176,
+      "macro_f1": 0.312,
+      "per_class": {
+        "extra_class": {
+          "precision": 0.2328,
+          "recall": 0.7458,
+          "f1": 0.3548,
+          "support": 59
+        },
+        "class_1": {
+          "precision": 0.3711,
+          "recall": 0.3396,
+          "f1": 0.3547,
+          "support": 106
+        },
+        "class_2": {
+          "precision": 0.3143,
+          "recall": 0.193,
+          "f1": 0.2391,
+          "support": 114
+        },
+        "reject": {
+          "precision": 0.76,
+          "recall": 0.1863,
+          "f1": 0.2992,
+          "support": 102
+        }
+      },
+      "confusion_matrix": [
+        [
+          44,
+          10,
+          5,
+          0
+        ],
+        [
+          59,
+          36,
+          10,
+          1
+        ],
+        [
+          51,
+          36,
+          22,
+          5
+        ],
+        [
+          35,
+          15,
+          33,
+          19
+        ]
+      ],
+      "n": 381
+    },
+    "defects_val_mmdet_carveout": {
+      "rotten": {
+        "precision": 0.9854,
+        "recall": 0.8766,
+        "f1": 0.9278,
+        "positives": 154,
+        "support": 211,
+        "roc_auc": 0.9749
+      },
+      "sprout": {
+        "precision": 0.8276,
+        "recall": 0.7442,
+        "f1": 0.7837,
+        "positives": 129,
+        "support": 211,
+        "roc_auc": 0.8662
+      }
+    }
+  },
+  "training_data": {
+    "quality": {
+      "sources": [
+        "onion-grading-coco-segmentation"
+      ],
+      "license": "CC BY 4.0",
+      "splits_used": [
+        "train",
+        "valid",
+        "test"
+      ]
+    },
+    "defects": {
+      "sources": [
+        "onion-coco-mmdetection"
+      ],
+      "license": "Public Domain",
+      "note": "no official split; deterministic 80/20 carve-out"
+    }
+  },
+  "limitations": [
+    "Quality classes are the Roboflow commercial grades, not a verified government standard.",
+    "Binary defect labels come from one source and one annotation protocol.",
+    "No negative (non-onion) images were used; rejection is handled separately.",
+    "CPU training on the available data; not field-validated.",
+    "damaged/undersized/bruising/shelf-life are NOT modelled (no labels exist).",
+    "The published 'valid' split leaks near-duplicates of train (85.2% measured); grouped-split metrics are the honest reference."
+  ]
+}

@@ -1,0 +1,162 @@
+[
+  {
+    "epoch": 1,
+    "mean_loss": 0.6705,
+    "epoch_seconds": 525.1,
+    "valid": {
+      "AP@0.50": 0.5011,
+      "AP@0.75": 0.3376,
+      "AP@0.50:0.95": 0.3227,
+      "precision@0.5score": 0.9634,
+      "recall@0.5score": 0.3716,
+      "f1@0.5score": 0.5363,
+      "tp": 369,
+      "fp": 14,
+      "fn": 624,
+      "score_threshold": 0.5,
+      "n_images": 562,
+      "n_gt_boxes": 993
+    },
+    "selection_metric": 0.3227
+  },
+  {
+    "epoch": 2,
+    "mean_loss": 0.6105,
+    "epoch_seconds": 512.4,
+    "valid": {
+      "AP@0.50": 0.5302,
+      "AP@0.75": 0.3454,
+      "AP@0.50:0.95": 0.3304,
+      "precision@0.5score": 0.9448,
+      "recall@0.5score": 0.3968,
+      "f1@0.5score": 0.5589,
+      "tp": 394,
+      "fp": 23,
+      "fn": 599,
+      "score_threshold": 0.5,
+      "n_images": 562,
+      "n_gt_boxes": 993
+    },
+    "selection_metric": 0.3304
+  },
+  {
+    "epoch": 3,
+    "mean_loss": 0.6067,
+    "epoch_seconds": 547.1,
+    "valid": {
+      "AP@0.50": 0.5066,
+      "AP@0.75": 0.3565,
+      "AP@0.50:0.95": 0.3293,
+      "precision@0.5score": 0.9629,
+      "recall@0.5score": 0.3917,
+      "f1@0.5score": 0.5569,
+      "tp": 389,
+      "fp": 15,
+      "fn": 604,
+      "score_threshold": 0.5,
+      "n_images": 562,
+      "n_gt_boxes": 993
+    },
+    "selection_metric": 0.3293
+  },
+  {
+    "epoch": 4,
+    "mean_loss": 0.5636,
+    "epoch_seconds": 421.7,
+    "valid": {
+      "AP@0.50": 0.5293,
+      "AP@0.75": 0.3555,
+      "AP@0.50:0.95": 0.338,
+      "precision@0.5score": 0.8439,
+      "recall@0.5score": 0.43,
+      "f1@0.5score": 0.5697,
+      "tp": 427,
+      "fp": 79,
+      "fn": 566,
+      "score_threshold": 0.5,
+      "n_images": 562,
+      "n_gt_boxes": 993
+    },
+    "selection_metric": 0.338
+  },
+  {
+    "epoch": 5,
+    "mean_loss": 0.5506,
+    "epoch_seconds": 495.4,
+    "valid": {
+      "AP@0.50": 0.5668,
+      "AP@0.75": 0.3686,
+      "AP@0.50:0.95": 0.3481,
+      "precision@0.5score": 0.8148,
+      "recall@0.5score": 0.4783,
+      "f1@0.5score": 0.6028,
+      "tp": 475,
+      "fp": 108,
+      "fn": 518,
+      "score_threshold": 0.5,
+      "n_images": 562,
+      "n_gt_boxes": 993
+    },
+    "selection_metric": 0.3481
+  },
+  {
+    "epoch": 6,
+    "mean_loss": 0.5699,
+    "epoch_seconds": 438.3,
+    "valid": {
+      "AP@0.50": 0.5696,
+      "AP@0.75": 0.3657,
+      "AP@0.50:0.95": 0.3542,
+      "precision@0.5score": 0.8108,
+      "recall@0.5score": 0.4834,
+      "f1@0.5score": 0.6057,
+      "tp": 480,
+      "fp": 112,
+      "fn": 513,
+      "score_threshold": 0.5,
+      "n_images": 562,
+      "n_gt_boxes": 993
+    },
+    "selection_metric": 0.3542
+  },
+  {
+    "epoch": 7,
+    "mean_loss": 0.5596,
+    "epoch_seconds": 499.4,
+    "valid": {
+      "AP@0.50": 0.5792,
+      "AP@0.75": 0.3682,
+      "AP@0.50:0.95": 0.3503,
+      "precision@0.5score": 0.7753,
+      "recall@0.5score": 0.4935,
+      "f1@0.5score": 0.6031,
+      "tp": 490,
+      "fp": 142,
+      "fn": 503,
+      "score_threshold": 0.5,
+      "n_images": 562,
+      "n_gt_boxes": 993
+    },
+    "selection_metric": 0.3503
+  },
+  {
+    "epoch": 8,
+    "mean_loss": 0.5635,
+    "epoch_seconds": 465.4,
+    "valid": {
+      "AP@0.50": 0.589,
+      "AP@0.75": 0.3726,
+      "AP@0.50:0.95": 0.3623,
+      "precision@0.5score": 0.7124,
+      "recall@0.5score": 0.5337,
+      "f1@0.5score": 0.6102,
+      "tp": 530,
+      "fp": 214,
+      "fn": 463,
+      "score_threshold": 0.5,
+      "n_images": 562,
+      "n_gt_boxes": 993
+    },
+    "selection_metric": 0.3623
+  }
+]
