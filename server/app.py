@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -44,6 +45,25 @@ app = FastAPI(
                  "versioned policy engine decides. Uncertain cases are escalated "
                  "to manual review with a reason code."),
 )
+
+# ------------------------------------------------------------------ CORS
+# Your website runs on its own origin; the browser needs explicit permission
+# to call this API. Origins come from ONIONQ_CORS_ORIGINS (comma-separated).
+# NOTE: allow_credentials=True requires explicit origins (never "*").
+import os as _os
+
+_CORS_ORIGINS = [
+    o.strip() for o in _os.environ.get("ONIONQ_CORS_ORIGINS", "").split(",")
+    if o.strip()
+]
+if _CORS_ORIGINS:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=_CORS_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 _store: Optional[Store] = None
 
@@ -88,6 +108,27 @@ def _registry_summary() -> Dict[str, Any]:
 @app.get("/health")
 def health() -> Dict[str, Any]:
     return {"status": "ok", "app_version": APP_VERSION}
+
+
+@app.post("/integrations/supabase/push")
+def supabase_push(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Push reports (dir of local report JSONs, or a single report) to Supabase.
+
+    Requires ONIONQ_SUPABASE_URL + ONIONQ_SUPABASE_SERVICE_KEY in the
+    environment; otherwise responds honestly that syncing is disabled.
+    """
+    from src.integrations.supabase_sync import SupabaseSync, sync_reports_dir
+
+    s = SupabaseSync()
+    if not s.can_write:
+        return {"synced": 0, "status": s.status(),
+                "reason": "set ONIONQ_SUPABASE_URL and "
+                          "ONIONQ_SUPABASE_SERVICE_KEY in .env"}
+    single = payload.get("report") if isinstance(payload, dict) else None
+    if single:
+        return {"result": s.upsert_report(single), "status": s.status()}
+    reports_dir = payload.get("reports_dir", "reports")
+    return sync_reports_dir(reports_dir=reports_dir)
 
 
 @app.get("/version")
