@@ -49,6 +49,13 @@ def _load_model(model_path: Optional[str] = None):
     return joblib.load(path)
 
 
+def _load_signal(audio_path: str) -> "np.ndarray":
+    """Load the raw signal for the impact gate (features already extracted)."""
+    from src.acoustic.loading import load_wav
+    _, samples = load_wav(audio_path)
+    return samples
+
+
 def model_dataset_types(artifact: Optional[Dict[str, Any]]) -> list:
     """Dataset classes recorded **by the artifact itself** (never inferred)."""
     if not artifact:
@@ -96,6 +103,26 @@ def classify_acoustic(audio_path: str, model_path: Optional[str] = None) -> Dict
         return _status_block(
             "retest_required", quality, None, dataset_types, MODEL_VERSION,
             warnings + [result.get("error", "quality gates failed")])
+
+    # ------------------------------------------------------------------
+    # IMPACT-PRESENCE GATE (runs BEFORE the model).
+    # A prediction on audio containing no tap/chirp response is a false
+    # answer — the model only describes impact-response audio, so it must
+    # never see anything else. This is the fix for "room noise got a
+    # defect prediction".
+    # ------------------------------------------------------------------
+    from src.acoustic.impact_gate import check_impact_present
+    sr = int(result.get("sample_rate_hz", 0))
+    sig = _load_signal(audio_path)
+    gate = check_impact_present(sig, sr,
+                                noise_floor_rms=(quality or {}).get(
+                                    "ambient_noise_rms"))
+    if not gate["passed"]:
+        return _status_block(
+            "no_impact_detected", quality, result["features"], dataset_types,
+            MODEL_VERSION,
+            warnings + ["no tap/chirp excitation found in recording: "
+                        + "; ".join(gate["reasons"])])
 
     if artifact is None:
         return _status_block(

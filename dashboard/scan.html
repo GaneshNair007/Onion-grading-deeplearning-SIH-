@@ -262,6 +262,20 @@ async function postAudio(path, blob, name) {
 function renderAcoustic(out, kind) {
   let h = "";
   const st = out.status || out.quality?.status || "unknown";
+  if (st === "no_impact_detected") {
+    h += '<div style="margin:4px 0 8px">' + badge("NO TAP/CHIRP DETECTED", "b-bad") + "</div>";
+    h += '<div class="muted" style="margin:6px 0">The recording does not contain a tap or chirp response — '
+      + 'no prediction is made (a guess would be a false answer). '
+      + '<b>Place the onion on a hard surface, put the mic 2–5 cm away, and tap it firmly 3×.</b></div>';
+    const w = (out.warnings||[]).filter(x=>x.includes("excitation"))[0];
+    if (w) h += '<div class="err">' + w.replace("no tap/chirp excitation found in recording: ", "reason: ") + "</div>";
+    const q = out.audio_quality || {};
+    if (q.snr_db != null) h += kv("SNR (dB)", q.snr_db);
+    h += '<div class="muted" style="margin-top:6px">Impact gate: the model only answers impact-response audio. Press <b>Play chirp + record</b> or <b>Record guided tap</b> again.</div>';
+    $("audOut").innerHTML = h;
+    $("raw").textContent = JSON.stringify(out, null, 2);
+    return;
+  }
   const cls = st === "valid" ? "b-ok" : st === "retest_required" ? "b-bad" : "b-warn";
   h += '<div style="margin:4px 0 8px">' + badge("status: " + st, cls) + "</div>";
   const q = out.quality || {};
