@@ -278,7 +278,7 @@ function renderAcoustic(out, kind) {
   }
   const cls = st === "valid" ? "b-ok" : st === "retest_required" ? "b-bad" : "b-warn";
   h += '<div style="margin:4px 0 8px">' + badge("status: " + st, cls) + "</div>";
-  const q = out.quality || {};
+  const q = out.audio_quality || out.quality || {};
   if (q.clipping != null) h += kv("clipping", q.clipping);
   if (q.silence != null) h += kv("silence", q.silence);
   if (q.snr_db != null) h += kv("SNR (dB)", q.snr_db);
