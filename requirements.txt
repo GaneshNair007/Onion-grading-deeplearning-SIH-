@@ -24,6 +24,7 @@ Pillow==12.3.0
 opencv-python-headless==5.0.0.93
 torch==2.13.0
 torchvision==0.28.0
+PyYAML==6.0.3             # config/models.yaml + policy loading (src/common/config.py)
 
 # --- API service (server/) ---
 fastapi==0.141.1
