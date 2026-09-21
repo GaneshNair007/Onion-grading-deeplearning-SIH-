@@ -30,9 +30,11 @@ from typing import Any, Dict
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-#: Vocabulary from the master plan §32. `uncertain` is a first-class answer.
-INTERNAL_LABELS = ("sound", "neck_rot", "soft_rot", "internal_sprouting",
-                   "hollow", "watery_translucent", "other", "uncertain")
+#: Shared vocabulary: the master plan §32 rot terms UNION the project-spec
+#: labels (sound / internal_defect / external_defect_only / sprouted /
+#: hollow_or_abnormal / uncertain). Kept in one place (src/acoustic/collection)
+#: so the CLI tool and the live ground-truth endpoint accept identical labels.
+from src.acoustic.collection import INTERNAL_LABELS  # noqa: E402
 GROUND_TRUTH_METHODS = ("cut_open", "expert_inspection", "paper_label",
                         "unknown")
 RAW_DIR = PROJECT_ROOT / "dataset-acoustic" / "raw"
@@ -113,12 +115,24 @@ def main(argv: list[str] | None = None) -> int:
                                f"({args.labelled_by}).")
         metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
 
+    # Propagate the label into every per-WAV sidecar: training/train_acoustic.py
+    # reads <recording>.json for labels, not metadata.json. Shared helper with
+    # the live collection path so both produce the identical format.
+    from src.acoustic.collection import (binary_internal_class,   # noqa: E402
+                                         propagate_label_to_sidecars)
+    sidecars_updated = propagate_label_to_sidecars(
+        onion_dir, args.onion_id, args.internal_label,
+        binary_internal_class(args.internal_label), args.method,
+        args.labelled_by)
+
     print(json.dumps({
         "onion_id": args.onion_id,
         "internal_label": args.internal_label,
+        "binary_internal_class": binary_internal_class(args.internal_label),
         "ground_truth_file": str(ground_truth_path),
         "photograph": str(destination),
         "metadata_updated": bool(metadata),
+        "sidecars_updated": sidecars_updated,
         "next_step": ("python training/train_acoustic.py --data "
                       "dataset-acoustic/raw --require-verified-onion-data "
                       "(refuses until enough labelled onions exist)"),

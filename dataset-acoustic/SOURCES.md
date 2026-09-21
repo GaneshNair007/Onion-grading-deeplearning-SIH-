@@ -9,7 +9,7 @@ see per-item notes). Nothing here is invented; absent fields are marked
 
 | # | Source | Type label | Onion-specific? | Downloadable data? | Redistributed here? |
 |---|---|---|---|---|---|
-| 1 | Landahl et al. 2022 — onion LDV vibrometry | `paper_only` | **Yes** | No (paywalled paper; data not published) | No — citation only |
+| 1 | Landahl et al. 2022 — onion LDV vibrometry | `paper_only` | **Yes** | Paper **yes** (CC BY 4.0 OA); **raw vibration data: no** | Paper copy redistributable; **not committed yet** — fetch via browser (see entry 1) |
 | 2 | Caladcad et al. 2023 — coconut tapping acoustic dataset | `related_produce_acoustic` | No | Yes (Mendeley Data) | **No — CC BY-NC-ND + 278 MB single file** |
 | 3 | Labanska et al. 2022 — onion electronic nose | `paper_only` | **Yes** (non-acoustic) | No | No — citation only |
 | 4 | Nishino et al. 2019 — dual-beam spectral internal onion rot | `paper_only` | **Yes** (non-acoustic) | No | No — citation only |
@@ -25,8 +25,9 @@ see per-item notes). Nothing here is invented; absent fields are marked
   (also indexed at Cranfield University's institutional repository:
   <https://dspace.lib.cranfield.ac.uk/items/8eb70c8d-bbe8-4fc7-bfe7-045062e2b9e2>)
 - **DOI:** `10.1016/j.biosystemseng.2022.07.004`
-- **License:** © Elsevier (subscription article). Open PDF not confirmed.
-- **Download date:** 2026-09-18 (metadata retrieved via web search).
+- **License:** **Paper is open access, CC BY 4.0** (Crossref `vor` license + Unpaywall `cc-by` + Semantic Scholar `CCBY`; verified 2026-09-21). Underlying vibration/audio data remains **not published**.
+- **Download date:** metadata 2026-09-18; OA status re-verified 2026-09-21 via Crossref/Unpaywall/Semantic Scholar APIs.
+- **How to obtain the paper:** publisher OA page <https://doi.org/10.1016/j.biosystemseng.2022.07.004> or the Cranfield submitted-version PDF <https://dspace.lib.cranfield.ac.uk/bitstreams/c76f38c0-7c18-4d3a-a1f3-24fa8f8a418b/download>. Note: Cranfield DSpace blocks non-browser clients (HTTP 403), so fetch in a normal browser and save as `dataset-acoustic/research/landahl_2022_onion_ldv_paper.pdf` (CC BY permits this and redistribution with attribution). A publisher **Corrigendum** exists: DOI `10.1016/j.biosystemseng.2022.10.012` (Dec 2022) — the user's second reference link; consult alongside the paper.
 - **File count / total size:** paper only; underlying vibration/audio data
   **not published** in any public repository found.
 - **Audio formats / sample rate:** none published (LDV velocity measurements,
@@ -109,7 +110,7 @@ see per-item notes). Nothing here is invented; absent fields are marked
 | Source | Reason | How to obtain |
 |---|---|---|
 | Coconut acoustic dataset (Mendeley `hxh8kd3snj`) | CC BY-NC-ND 4.0 — NoDerivatives forbids repacked redistribution; single 278 MB file exceeds GitHub's 100 MiB limit | Run `python tools/download_external_acoustic_data.py --item coconut --dest <local folder>` which downloads it directly from Mendeley into a **local, non-committed** folder, then verify SHA-256 `629fbc02a8ffac1a40222a2c6a536a1e4a51e812fe9defaaed93417e6c151971` |
-| Landahl et al. 2022 (onion LDV) | Publisher paywall; no public dataset exists | Access via institution; cite DOI `10.1016/j.biosystemseng.2022.07.004` |
+| Landahl et al. 2022 (onion LDV) | No public dataset exists — the raw LDV vibration files were never published; the **paper itself** is CC BY 4.0 OA and may be downloaded/redistributed with attribution | Fetch the PDF in a browser from the DOI or the Cranfield bitstream link (see entry 1); cite DOI `10.1016/j.biosystemseng.2022.07.004` and Corrigendum `10.1016/j.biosystemseng.2022.10.012` |
 | All other `paper_only` entries | Papers, not datasets | Follow the URLs above |
 
 ## Explicit honesty statement

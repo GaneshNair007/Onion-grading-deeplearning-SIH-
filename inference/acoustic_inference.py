@@ -34,10 +34,12 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(PROJECT_ROOT))
 
 from src.acoustic.features import analyze_file, FEATURE_ORDER  # noqa: E402
+from src.common.config import get_setting  # noqa: E402
 
 MODEL_PATH = PROJECT_ROOT / "models" / "acoustic" / "acoustic_baseline.joblib"
 MODEL_VERSION = "acoustic-v1-synthetic-demo"
-CONFIDENCE_FLOOR = 0.55
+# Config-driven (config/models.yaml); 0.55 is only the load-time fallback.
+CONFIDENCE_FLOOR = float(get_setting("acoustic_confidence_threshold", 0.55))
 HIGH_QUALITY_SNR_DB = 12.0
 
 
@@ -91,8 +93,17 @@ def _status_block(status: str, quality: Dict[str, Any],
     return payload
 
 
-def classify_acoustic(audio_path: str, model_path: Optional[str] = None) -> Dict[str, Any]:
-    """Run quality gates + feature extraction + baseline model on one WAV."""
+def classify_acoustic(audio_path: str,
+                      model_path: Optional[str] = None,
+                      capture_method: Optional[str] = None) -> Dict[str, Any]:
+    """Run quality gates + feature extraction + baseline model on one WAV.
+
+    ``capture_method`` (``phone_tap`` | ``phone_chirp`` | ``unknown``) selects
+    the matching evidence check in the impact gate — a chirp response has
+    sustained excitation, not a single transient, so judging it by tap
+    criteria is a category error. When omitted, the conservative default
+    applies the tap criteria to *both* signatures (pass if EITHER matches).
+    """
     artifact = _load_model(model_path)
     warnings: list[str] = []
     dataset_types = model_dataset_types(artifact)
@@ -114,9 +125,10 @@ def classify_acoustic(audio_path: str, model_path: Optional[str] = None) -> Dict
     from src.acoustic.impact_gate import check_impact_present
     sr = int(result.get("sample_rate_hz", 0))
     sig = _load_signal(audio_path)
-    gate = check_impact_present(sig, sr,
-                                noise_floor_rms=(quality or {}).get(
-                                    "ambient_noise_rms"))
+    gate = check_impact_present(
+        sig, sr,
+        capture_method=capture_method,
+        noise_floor_rms=(quality or {}).get("ambient_noise_rms"))
     if not gate["passed"]:
         return _status_block(
             "no_impact_detected", quality, result["features"], dataset_types,

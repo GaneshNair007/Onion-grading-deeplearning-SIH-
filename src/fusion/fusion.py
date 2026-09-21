@@ -19,6 +19,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
+from src.common.config import get_setting
 from src.common.contracts import acoustic_grading_eligible
 
 ACOUSTIC_WEIGHT = 0.35
@@ -57,6 +58,8 @@ def fuse_results(vision_result: Dict[str, Any],
         return {
             "is_onion": False,
             "final": {"label": "not_onion", "freshness_score": None,
+ "shelf_life_status": "not_trained",
+ "estimated_days_remaining": None,
                       "reason": "no onion detected in the image"},
             "acoustic_eligible": acoustic_eligible,
             "warnings": warnings,
@@ -100,6 +103,8 @@ def fuse_results(vision_result: Dict[str, Any],
             "final": {
                 "label": "needs_manual_review" if v_label in UNCERTAIN_LABELS else v_label,
                 "freshness_score": final_score,
+                "shelf_life_status": "not_trained",
+                "estimated_days_remaining": None,
                 "reason": ("vision below confidence threshold"
                            if v_label in UNCERTAIN_LABELS
                            else f"vision-only result; {acoustic_reason}"),
@@ -145,6 +150,8 @@ def fuse_results(vision_result: Dict[str, Any],
             "final": {
                 "label": "needs_manual_review",
                 "freshness_score": None,
+                "shelf_life_status": "not_trained",
+                "estimated_days_remaining": None,
                 "reason": "multimodal disagreement",
                 "vision_confidence": v_conf,
                 "acoustic_confidence": a_conf,
@@ -155,7 +162,7 @@ def fuse_results(vision_result: Dict[str, Any],
         }
 
     # Low-confidence acoustic evidence is surfaced, never silently applied.
-    if a_conf < 0.55:
+    if a_conf < float(get_setting("acoustic_confidence_threshold", 0.55)):
         warnings.append(
             f"acoustic confidence {a_conf} is low; result weighted toward vision")
 
@@ -173,6 +180,8 @@ def fuse_results(vision_result: Dict[str, Any],
         "final": {
             "label": label,
             "freshness_score": fused_score,
+            "shelf_life_status": "not_trained",
+            "estimated_days_remaining": None,
             "visible_defect_score": (round(vision_defect_score, 4)
                                      if vision_defect_score is not None else None),
             "reason": reason,

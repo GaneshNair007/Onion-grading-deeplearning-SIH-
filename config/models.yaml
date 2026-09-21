@@ -1,0 +1,20 @@
+# Model inference + fusion configuration (ONION-Q).
+#
+# Rule: thresholds and fusion policy live HERE, never inside Python source,
+# so an auditor can inspect or change decision behaviour without touching
+# code. A `null` value DISABLES the corresponding check — it never means
+# "use a guessed default number".
+#
+# Values below match the previously code-embedded constants exactly
+# (0.55 / 0.55 / 0.50) so behaviour is unchanged; they are now inspectable.
+
+vision_confidence_threshold: 0.55   # below this the vision result is "uncertain"
+acoustic_confidence_threshold: 0.55 # below this acoustic evidence is flagged low-confidence
+vision_defect_threshold: 0.50       # attribute probability above which a defect is "detected"
+
+minimum_audio_snr_db: null          # NOT scientifically determined for onion phone audio
+                                    # yet — the SNR gate stays disabled rather than inventing
+                                    # a value. Set only when a measured basis exists.
+
+fusion_strategy: "confidence_weighted"
+manual_review_on_disagreement: true

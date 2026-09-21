@@ -6,8 +6,10 @@ Freshness Grading project, strictly separated by verification status.
 ## Headline status (read this first)
 
 **No publicly downloadable, redistributable onion acoustic dataset was found.**
-The only onion-specific vibrometry study located is a journal paper whose
-underlying audio/vibration data is not published (see `research/`). The only
+The onion-specific vibrometry study (Landahl et al. 2022) is **open access as a
+paper (CC BY 4.0 — verified 2026-09-21 via Crossref/Unpaywall/Semantic
+Scholar)**, but its underlying LDV vibration files were **not published** in
+any repository, so there is no raw onion acoustic data to train on. The only
 downloadable related-produce acoustic dataset found (coconut tapping,
 Mendeley Data) is CC BY-NC-ND and its single 278 MB XLSX file exceeds GitHub's
 size limit — it is **not redistributed here**; only its metadata and a manual
@@ -24,6 +26,26 @@ Therefore:
 - `synthetic/` contains the clearly-labelled synthetic demonstration audio
   described below. **It is not onion data and must never be used as onion
   ground truth.**
+
+## Live collection mode (scan page + API)
+
+Real phone taps can be saved directly from the scan page
+(`/dashboard/app/scan.html`, section *3 · Data collection*) or via the API:
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /acoustic/collect` | save one recording (multipart WAV) into `raw/<ONION_ID>/` with a per-WAV sidecar |
+| `POST /acoustic/ground-truth` | cut-open label + photograph — **the only way an `internal_label` is ever set** |
+| `GET /acoustic/collection-status` | honest trainability report: verified onions vs the 30-onion minimum |
+
+Storage format is exactly what `training/train_acoustic.py` reads: the ONION
+id is part of the filename (leak-safe grouping) and every WAV has a `.json`
+sidecar carrying `dataset_type=verified_onion_acoustic`, null label fields
+until the cut-open step, and real WAV-header values (rate, channels,
+duration). The legacy CLI path
+(`scripts/collect_acoustic_sample.py` + `scripts/add_cut_open_ground_truth.py`)
+writes the identical format. Set `ONIONQ_ACOUSTIC_RAW_DIR` to redirect
+collection to a scratch directory (used by tests and live verification).
 
 ## Dataset-type labels used everywhere in this project
 

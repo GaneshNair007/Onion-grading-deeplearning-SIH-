@@ -99,9 +99,11 @@ def classify_vision(image_path: str, model_path: Optional[str] = None,
 
 
 def classify_acoustic(audio_path: str,
-                      model_path: Optional[str] = None) -> Dict[str, Any]:
+                      model_path: Optional[str] = None,
+                      capture_method: Optional[str] = None) -> Dict[str, Any]:
     from inference.acoustic_inference import classify_acoustic as _ca
-    return _ca(audio_path, model_path=model_path)
+    return _ca(audio_path, model_path=model_path,
+               capture_method=capture_method)
 
 
 def fuse_results(vision_result: Dict[str, Any],
@@ -157,7 +159,9 @@ def run_phone_acoustic_test(record_response: "callable",
                 "reason": measurement.get("reason", "acoustic measurement failed")}
 
     audio_path = measurement.get("audio_path")
-    acoustic = classify_acoustic(audio_path, model_path=model_path) \
+    acoustic = classify_acoustic(
+        audio_path, model_path=model_path,
+        capture_method=("phone_chirp" if use_chirp else "phone_tap")) \
         if audio_path else None
     return {"ok": True, "status": "valid", "measurement": measurement,
             "acoustic": acoustic, "device": metadata}

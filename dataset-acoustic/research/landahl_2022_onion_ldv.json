@@ -15,6 +15,24 @@
   "dataset_type": "paper_only",
   "is_onion_specific": true,
   "data_publicly_available": false,
+  "paper_open_access": true,
+  "paper_license": "CC BY 4.0 (published version, hybrid OA)",
+  "paper_open_access_evidence": [
+    "Crossref API license field: creativecommons.org/licenses/by/4.0 (content-version: vor), checked 2026-09-21",
+    "Unpaywall: is_oa=true, oa_status=hybrid, license=cc-by, repository copy at Cranfield CERES",
+    "Semantic Scholar: isOpenAccess=true, openAccessPdf.license=CCBY"
+  ],
+  "paper_download": {
+    "publisher_oa_url": "https://doi.org/10.1016/j.biosystemseng.2022.07.004",
+    "cranfield_submitted_version": "https://dspace.lib.cranfield.ac.uk/bitstreams/c76f38c0-7c18-4d3a-a1f3-24fa8f8a418b/download",
+    "cranfield_landing_page": "https://dspace.lib.cranfield.ac.uk/handle/1826/18317",
+    "note": "Automated fetches of dspace.lib.cranfield.ac.uk are blocked by Cloudflare bot protection (HTTP 403 for non-browser clients). The CC BY license permits downloading and redistribution; fetch the PDF in a normal browser from either URL and store it in dataset-acoustic/research/ as landahl_2022_onion_ldv_paper.pdf."
+  },
+  "corrigendum": {
+    "doi": "10.1016/j.biosystemseng.2022.10.012",
+    "published": "2022-12",
+    "note": "Publisher corrigendum to the paper (single page). Check when reading the paper's methods/results."
+  },
   "key_findings_relevant_to_project": [
     "Laser Doppler vibrometry (LDV) can non-destructively identify internal defects, including neck rot, in onion bulbs.",
     "Single-point and scanning LDV measurements of bulb vibration response differ between defective and sound bulbs.",
@@ -25,8 +43,9 @@
     "Justification for onion-level (cultivar-aware) validation splits.",
     "It is NOT used as evidence that a phone speaker/microphone system detects onion internal rot - the paper uses laboratory LDV hardware."
   ],
-  "license": "(c) Elsevier - subscription article; no public dataset located",
-  "full_text_access": "not confirmed; paywalled at publisher",
+  "license": "Paper: CC BY 4.0 (open access). No public dataset located - the underlying LDV vibration files were not published.",
+  "full_text_access": "open access (CC BY 4.0) at publisher DOI; submitted-version PDF in Cranfield CERES repository",
   "metadata_recorded_date": "2026-09-18",
+  "metadata_last_verified": "2026-09-21",
   "notes": "Recorded as a research reference per project rules. No audio or vibration data from this paper is included or used as training data anywhere in this repository."
 }

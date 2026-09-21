@@ -321,9 +321,19 @@ def test_vision_inference_contract(real_onion_image):
     assert any("field-validated" in w for w in result["warnings"])
 
 
-def test_legacy_demo_script_is_gone():
-    """The pre-audit demo imported untracked local folders; it must not come back."""
-    assert not (PROJECT_ROOT / "scripts" / "demo_onion_scan.py").exists(), (
-        "scripts/demo_onion_scan.py depended on an untracked dataset folder "
-        "(audit P0.1/P0.3); use scripts/demo_batch_scan.py or "
-        "scripts/demo_deep_scan.py")
+def test_demo_onion_scan_script_is_self_contained():
+    """The combined demo was deleted once (audit P0.1/P0.3) because it imported
+    an untracked local dataset folder. The rewritten script must stay
+    self-contained: image/audio come from the command line, and only tracked
+    inference modules are imported. The supporting demo scripts must also
+    remain in place."""
+    script = PROJECT_ROOT / "scripts" / "demo_onion_scan.py"
+    assert script.exists(), (
+        "scripts/demo_onion_scan.py (combined vision+acoustic demo) is missing")
+    src = script.read_text(encoding="utf-8")
+    for forbidden in ("Onion Grading", "demo/", "C:\\SIH", "local_data", ".pt\""):
+        assert forbidden not in src, (
+            f"demo_onion_scan.py must not reference untracked local data "
+            f"({forbidden!r}); take --image/--audio from the command line only")
+    assert (PROJECT_ROOT / "scripts" / "demo_batch_scan.py").exists()
+    assert (PROJECT_ROOT / "scripts" / "demo_deep_scan.py").exists()

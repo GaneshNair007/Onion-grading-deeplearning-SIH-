@@ -31,8 +31,11 @@ ATTRIBUTE_DIR = PROJECT_ROOT / "models" / "vision" / "attributes"
 REGISTRY_PATH = PROJECT_ROOT / "models" / "registry.json"
 REFERENCE_PATH = PROJECT_ROOT / "models" / "vision" / "rejection_reference.npz"
 
-UNCERTAIN_THRESHOLD = 0.55
-DEFECT_THRESHOLD = 0.50
+# Config-driven (config/models.yaml); the literals are only load-time fallbacks.
+from src.common.config import get_setting  # noqa: E402
+
+UNCERTAIN_THRESHOLD = float(get_setting("vision_confidence_threshold", 0.55))
+DEFECT_THRESHOLD = float(get_setting("vision_defect_threshold", 0.50))
 MODEL_ID = "vision-attributes-v0.1"
 
 try:

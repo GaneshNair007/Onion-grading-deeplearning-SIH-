@@ -91,6 +91,84 @@ Acoustic result is <b>research-only</b> (synthetic-trained model) and can never 
     <button id="recChirp" class="primary">Play chirp + record</button>
     <button id="recTap">Record guided tap (3 s)</button>
     <div class="muted" id="audState">Idle.</div>
+
+    <h2>3 · Data collection (save real taps for training)</h2>
+    <p class="muted">Records a 3 s tap through this microphone and <b>saves it permanently</b>
+       to <code>dataset-acoustic/raw/&lt;ONION_ID&gt;/</code> with a metadata sidecar —
+       the exact format <code>training/train_acoustic.py</code> reads. The interior
+       label stays <b>null</b> until you cut the onion open and submit ground truth.
+       Protocol: 3 taps per onion, then cut open, photograph the interior, label it.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <label>ONION id <input id="colOnion" placeholder="ONION_000001" size="13" style="width:11.5em"></label>
+      <label>Position
+        <select id="colPos">
+          <option value="equator">equator</option>
+          <option value="neck">neck</option>
+          <option value="base">base</option>
+        </select>
+      </label>
+      <label>Device <input id="colDevice" placeholder="e.g. Pixel 7a / Android 14" size="18" style="width:14em"></label>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button id="colNext" title="Highest existing ONION_xxxxxx + 1">Next free ONION id</button>
+      <button id="colRec" class="primary">Record + SAVE tap (3 s)</button>
+      <span id="colCount" class="muted"></span>
+    </div>
+    <div id="colOut" class="muted" style="margin-top:6px">No collection recording yet.</div>
+    <div class="err" id="colErr"></div>
+    <h2>Ground truth (cut open — the only way to label)</h2>
+    <p class="muted">After cutting onion <b>open</b>, submit the verified interior label. It
+       propagates to every saved recording of that onion and only then can the data
+       train a real model.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <label>ONION id <input id="gtOnion" placeholder="ONION_000001" size="13" style="width:11.5em"></label>
+      <label>Interior label
+        <select id="gtLabel">
+          <option value="sound">sound</option>
+          <option value="internal_defect">internal_defect</option>
+          <option value="external_defect_only">external_defect_only</option>
+          <option value="sprouted">sprouted</option>
+          <option value="hollow_or_abnormal">hollow_or_abnormal</option>
+          <option value="uncertain">uncertain</option>
+        </select>
+      </label>
+      <label>Labelled by <input id="gtBy" placeholder="your name" size="12" style="width:11em"></label>
+      <label>Photo (evidence) <input id="gtPhoto" type="file" accept="image/*"></label>
+      <button id="gtSubmit">Submit ground truth</button>
+    </div>
+    <div id="gtOut" class="muted" style="margin-top:6px">Not labelled yet.</div>
+    <div class="err" id="gtErr"></div>
+    <div style="margin-top:8px"><button id="gtStatus">Collection status (trainability)</button>
+      <span id="gtSummary" class="muted"></span></div>
+
+    <h2>4 · Gate calibration (phone recordings)</h2>
+    <p class="muted">One-time setup: capture labeled recordings with <b>your phone</b> so the
+       gate's thresholds are tuned on real measurements, not guesses. Sit the phone where it
+       will sit during real scans. Capture <b>at least 3 of each kind</b>; green = gate passed,
+       red = gate rejected, and the “expected” column tells you which one it should be.</p>
+    <ol class="muted" style="font-size:.9em;line-height:1.5">
+      <li><b>chirp_valid</b> — onion on the table, mic 2–5 cm; press the button (chirp plays automatically).</li>
+      <li><b>chirp_room</b> — same, but <b>no onion</b> near the mic (chirp into open room).</li>
+      <li><b>tap_valid</b> — onion present; tap firmly 3× with a knuckle during the window.</li>
+      <li><b>noise_room</b> — room completely still; nobody touches anything.</li>
+      <li><b>noise_swell</b> — rustle paper / slide the phone / talk softly (audio that must be refused).</li>
+    </ol>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <label>Kind
+        <select id="calKind">
+          <option value="chirp_valid">chirp_valid (onion + chirp)</option>
+          <option value="chirp_room">chirp_room (no onion)</option>
+          <option value="tap_valid">tap_valid (onion + 3 taps)</option>
+          <option value="noise_room">noise_room (silence)</option>
+          <option value="noise_swell">noise_swell (rustle/move)</option>
+        </select>
+      </label>
+      <label>Device <input id="calDevice" placeholder="e.g. Redmi Note 12" size="16" style="width:12em"></label>
+      <label>Distance cm <input id="calDist" placeholder="3" size="3" style="width:3.5em"></label>
+      <button id="calRec" class="primary">Capture calibration (3 s)</button>
+    </div>
+    <div id="calOut" class="muted" style="margin-top:6px">No calibration captures yet.</div>
+    <div class="err" id="calErr"></div>
     <audio id="playback" controls></audio>
     <div class="err" id="audErr"></div>
     <h2>Acoustic result</h2>
@@ -253,8 +331,9 @@ function encodeWav(samples, rate) { // mono 16-bit PCM WAV
   }
   return new Blob([buf], { type:"audio/wav" });
 }
-async function postAudio(path, blob, name) {
+async function postAudio(path, blob, name, extra = {}) {
   const fd = new FormData(); fd.append("audio", blob, name);
+  for (const [k, v] of Object.entries(extra)) fd.append(k, v);
   const r = await fetch(API + path, { method:"POST", body:fd });
   if (!r.ok) throw new Error(r.status + " " + (await r.text()).slice(0,200));
   return r.json();
@@ -307,7 +386,8 @@ $("recAmbient").onclick = async () => {
 $("recChirp").onclick = async () => {
   try { const rec = await recordSeconds(3, {chirp:true, label:"chirp response"});
     $("playback").src = URL.createObjectURL(rec.blob);
-    renderAcoustic(await postAudio("/acoustic/classify", rec.blob, "chirp_response.wav"), "chirp");
+    renderAcoustic(await postAudio("/acoustic/classify", rec.blob, "chirp_response.wav",
+                                   { capture_method: "phone_chirp" }), "chirp");
     $("audState").textContent = "Chirp capture complete (" + rec.seconds.toFixed(1) + " s, " + Math.round(rec.sampleRate/100)/10 + " kHz).";
   } catch (e) { $("audErr").textContent = "Chirp failed: " + e.message; }
 };
@@ -315,9 +395,112 @@ $("recTap").onclick = async () => {
   try { $("audState").textContent = "Tap the onion 3× on the mic-side surface now…";
     const rec = await recordSeconds(3, {label:"tap"});
     $("playback").src = URL.createObjectURL(rec.blob);
-    renderAcoustic(await postAudio("/acoustic/classify", rec.blob, "tap_response.wav"), "tap");
+    renderAcoustic(await postAudio("/acoustic/classify", rec.blob, "tap_response.wav",
+                                   { capture_method: "phone_tap" }), "tap");
     $("audState").textContent = "Tap capture complete (" + rec.seconds.toFixed(1) + " s).";
   } catch (e) { $("audErr").textContent = "Tap failed: " + e.message; }
+};
+
+// ------------------------------ data collection (save real taps) ------------------------------
+function formPost(path, fd) {
+  return fetch(API + path, { method: "POST", body: fd }).then(async r => {
+    if (!r.ok) throw new Error(r.status + " " + (await r.text()).slice(0, 200));
+    return r.json();
+  });
+}
+$("colNext").onclick = async () => {
+  try {
+    const st = await fetch(API + "/acoustic/collection-status").then(r => r.json());
+    // Server scans the real highest ONION_xxxxxx id — correct even when
+    // existing ids are non-contiguous or pre-seeded.
+    $("colOnion").value = st.next_onion_id;
+    $("colCount").textContent = (st.onions_started || 0)
+      ? (st.onions_started + " onion(s) started · " + st.recordings_total + " recordings")
+      : "no onions yet — this will be the first";
+  } catch (e) { $("colErr").textContent = "Next-id failed: " + e.message; }
+};
+$("colRec").onclick = async () => {
+  $("colErr").textContent = "";
+  const onion = ($("colOnion").value || "").trim().toUpperCase();
+  if (!/^ONION_\d{6}$/.test(onion)) { $("colErr").textContent = "Enter an ONION_xxxxxx id first (use 'Next free ONION id')."; return; }
+  try {
+    $("colOut").textContent = "Recording 3 s — tap the onion firmly 3× NOW…";
+    const rec = await recordSeconds(3, { label: "collection tap" });
+    $("playback").src = URL.createObjectURL(rec.blob);
+    const fd = new FormData();
+    fd.append("audio", rec.blob, "tap.wav");
+    fd.append("onion_id", onion);
+    fd.append("capture_method", "phone_tap");
+    fd.append("position", $("colPos").value);
+    fd.append("device", $("colDevice").value || "");
+    fd.append("notes", "browser capture via scan page");
+    const out = await formPost("/acoustic/collect", fd);
+    $("colOut").innerHTML = "<b>Saved:</b> " + out.audio_file + " → " + out.sidecar +
+      "<br><span class=muted>recording_id " + out.recording_id + " · " +
+      out.header.sample_rate_hz + " Hz · " + out.header.duration_seconds + " s · " +
+      "internal_label: null (cut open to label)</span>";
+    refreshColStatus();
+  } catch (e) { $("colErr").textContent = "Collect failed: " + e.message; }
+};
+async function refreshColStatus() {
+  try {
+    const st = await fetch(API + "/acoustic/collection-status").then(r => r.json());
+    $("gtSummary").textContent = st.status + " — " + st.available_verified_onions + "/" +
+      st.required_minimum_onions + " verified onions · " + st.recordings_total + " recordings";
+  } catch (e) { /* status is advisory; ignore transient errors */ }
+}
+$("gtStatus").onclick = refreshColStatus;
+$("gtSubmit").onclick = async () => {
+  $("gtErr").textContent = "";
+  const onion = ($("gtOnion").value || "").trim().toUpperCase();
+  const by = ($("gtBy").value || "").trim();
+  if (!/^ONION_\d{6}$/.test(onion)) { $("gtErr").textContent = "Enter the ONION_xxxxxx id."; return; }
+  if (!by) { $("gtErr").textContent = "Enter who labelled it (labelled_by is required evidence)."; return; }
+  try {
+    const fd = new FormData();
+    fd.append("onion_id", onion);
+    fd.append("internal_label", $("gtLabel").value);
+    fd.append("labelled_by", by);
+    const photo = $("gtPhoto").files[0];
+    if (photo) fd.append("photograph", photo, photo.name);
+    const out = await formPost("/acoustic/ground-truth", fd);
+    $("gtOut").innerHTML = "<b>Labelled:</b> " + out.onion_id + " → <b>" + out.internal_label +
+      "</b> (binary class " + (out.binary_internal_class === null ? "excluded" : out.binary_internal_class) +
+      ") · " + out.sidecars_updated + " recording(s) updated" +
+      (out.photograph ? " · photo saved: " + out.photograph : " · <span class=err>NO photo evidence</span>");
+    refreshColStatus();
+  } catch (e) { $("gtErr").textContent = "Ground truth failed: " + e.message; }
+};
+
+// ------------------------------ gate calibration (phone captures) ------------------------------
+$("calRec").onclick = async () => {
+  $("calErr").textContent = "";
+  const kind = $("calKind").value;
+  try {
+    $("calOut").textContent = "Recording 3 s — do the " + kind + " action NOW…";
+    const rec = await recordSeconds(3, { chirp: kind.startsWith("chirp"), label: kind });
+    const fd = new FormData();
+    fd.append("audio", rec.blob, kind + ".wav");
+    fd.append("kind", kind);
+    fd.append("device", $("calDevice").value || "");
+    fd.append("distance_cm", $("calDist").value || "");
+    fd.append("notes", "browser capture via scan page");
+    const out = await formPost("/acoustic/calibration-capture", fd);
+    const m = out.measured || {};
+    const expectedPass = kind.endsWith("_valid");
+    const ok = out.passed_current_gate === expectedPass;
+    $("calOut").innerHTML = "<b>Saved:</b> " + out.saved + " — gate " +
+      (out.passed_current_gate
+        ? '<span style="color:#0a0">PASSED</span>'
+        : '<span class="err">REJECTED</span>') +
+      " · expected: " + (expectedPass ? "pass" : "reject") +
+      (ok ? " ✓" : " <span class=err>✗ MISMATCH</span>") +
+      "<br><span class=muted>peak " + m.peak_amplitude + " · crest " + m.crest_factor +
+      " · decay " + m.post_peak_decay_rate_per_s + "/s · excess " +
+      m.rms_excess_over_floor_db + " dB</span>" +
+      (out.reasons && out.reasons.length
+        ? "<br><span class=muted>reasons: " + out.reasons.join("; ") + "</span>" : "");
+  } catch (e) { $("calErr").textContent = "Calibration capture failed: " + e.message; }
 };
 </script>
 </body>

@@ -89,6 +89,60 @@ def test_gate_rejects_empty_signal():
     assert g["passed"] is False
 
 
+# ------------------------------------- capture-method routing (calibration)
+def _chirp_response(seconds: float = 2.0, sr: int = 16000) -> np.ndarray:
+    """A chirp-response capture faithful to the scan page's recordSeconds():
+    ~0.15 s of room noise (recording starts before the speaker does), then a
+    1 s log chirp at amplitude 0.25, then room noise again. The result has
+    sustained tonal excitation above the floor, NO impulsive attack and NO
+    free decay — the physics of a speaker chirp off an onion, which is
+    exactly what tap criteria can never accept."""
+    rng = np.random.default_rng(7)
+    lead = rng.normal(0, 0.005, int(sr * 0.15))
+    t = np.arange(int(sr * 1.0)) / sr
+    chirp = 0.25 * np.sin(2 * np.pi * (300 + 1800 * t) * t)
+    chirp += rng.normal(0, 0.005, len(t))
+    tail = rng.normal(0, 0.005, max(int(sr * seconds) - len(lead) - len(chirp), 0))
+    return np.concatenate([lead, chirp, tail])
+
+
+def test_chirp_capture_judged_by_chirp_criteria_not_tap():
+    """Root cause of the chirp over-rejection: classify_acoustic never passed
+    capture_method to the gate, so chirp recordings were judged by tap
+    criteria (crest/decay) they can never satisfy. A real chirp response
+    must pass through the chirp branch."""
+    sig = _chirp_response()
+    g = check_impact_present(sig, 16000, capture_method="phone_chirp")
+    assert g["passed"] is True, g["reasons"]
+
+
+def test_chirp_room_without_onion_still_rejected():
+    """The chirp branch must not become a rubber stamp: a room recording
+    where the chirp produced no response above the floor must still fail."""
+    g = check_impact_present(_noise(seconds=2.0, seed=11, sigma=0.02),
+                             16000, capture_method="phone_chirp")
+    assert g["passed"] is False
+
+
+def test_unknown_method_accepts_either_signature():
+    """With no capture_method given, a recording matching EITHER the tap OR
+    the chirp signature must pass — and the matched signature is recorded."""
+    tap = check_impact_present(_tap(rng=np.random.default_rng(9)), 16000)
+    chirp = check_impact_present(_chirp_response(), 16000)
+    assert tap["passed"] is True
+    assert tap["measured"]["matched_signature"] == "tap"
+    assert chirp["passed"] is True
+    assert chirp["measured"]["matched_signature"] == "chirp"
+
+
+def test_unknown_method_still_rejects_noise():
+    """The either-signature relaxation must not reopen the original wound:
+    noise has neither signature and must still be rejected."""
+    g = check_impact_present(_noise(seconds=2.0, seed=13, sigma=0.02), 16000)
+    assert g["passed"] is False
+    assert any("tap signature" in r for r in g["reasons"])
+
+
 # ------------------------------------------------------- inference level
 def test_classify_returns_no_impact_for_noise(tmp_path):
     from inference.acoustic_inference import classify_acoustic

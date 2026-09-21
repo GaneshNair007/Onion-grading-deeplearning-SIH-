@@ -11,6 +11,7 @@ Doc:
 """
 from __future__ import annotations
 
+import json
 import sys
 import tempfile
 from pathlib import Path
@@ -217,6 +218,76 @@ async def scan_deep(neck: Optional[UploadFile] = File(None),
     return result
 
 
+# ------------------------------------------------------- gate calibration
+@app.post("/acoustic/calibration-capture")
+async def calibration_capture(audio: UploadFile = File(...),
+                              kind: str = Form(...),
+                              device: str = Form(""),
+                              distance_cm: str = Form(""),
+                              notes: str = Form("")) -> Dict[str, Any]:
+    """Save a labeled calibration recording and return its raw gate metrics.
+
+    ``kind``: chirp_valid (chirp with onion present), chirp_room (chirp,
+    onion absent), tap_valid, noise_room, noise_swell. Stored under
+    local_data/gate_calibration/ (gitignored) — calibration data, not
+    dataset. Returns the gate's measured dict so the page can show it and
+    the evaluator can sweep thresholds over real measurements.
+    """
+    import wave as _wave
+    from src.acoustic.impact_gate import check_impact_present
+    from src.acoustic.loading import load_wav
+
+    valid_kinds = {"chirp_valid", "chirp_room", "tap_valid", "noise_room",
+                   "noise_swell"}
+    if kind not in valid_kinds:
+        raise HTTPException(status_code=400, detail=f"kind must be one of {sorted(valid_kinds)}")
+    with _tmp_upload(audio) as path:
+        try:
+            _, sig = load_wav(str(path))
+        except Exception as exc:
+            raise HTTPException(status_code=400, detail=f"unreadable WAV: {exc}")
+        import numpy as _np
+        try:
+            with _wave.open(str(path), "rb") as w:
+                sr = int(w.getframerate())
+        except Exception:
+            sr = 0
+        gate = check_impact_present(
+            sig, sr, capture_method=("phone_chirp" if kind.startswith("chirp")
+                                     else "phone_tap" if kind.startswith("tap")
+                                     else None),
+            noise_floor_rms=None)
+        dest_dir = Path("local_data/gate_calibration")
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        import time as _time
+        name = f"{kind}_{_time.strftime('%H%M%S')}.wav"
+        (dest_dir / name).write_bytes(Path(path).read_bytes())
+        (dest_dir / (name[:-4] + ".json")).write_text(
+            json.dumps({"kind": kind, "device": device, "distance_cm": distance_cm,
+                        "notes": notes, "measured": gate["measured"],
+                        "passed_current_gate": gate["passed"],
+                        "reasons": gate["reasons"]}, indent=2), encoding="utf-8")
+        return {"saved": name, "kind": kind, "measured": gate["measured"],
+                "passed_current_gate": gate["passed"], "reasons": gate["reasons"]}
+
+
+@app.get("/acoustic/calibration-status")
+def calibration_status() -> Dict[str, Any]:
+    """Calibration set summary: counts per kind + current-gate accuracy."""
+    from collections import Counter
+    d = Path("local_data/gate_calibration")
+    counts: Counter = Counter()
+    if d.exists():
+        for j in d.glob("*.json"):
+            try:
+                meta = json.loads(j.read_text(encoding="utf-8"))
+                counts[str(meta.get("kind", "unknown"))] += 1
+            except Exception:
+                pass
+    return {"recordings": dict(counts), "total": sum(counts.values()),
+            "directory": str(d)}
+
+
 # ----------------------------------------------------------------- acoustic
 @app.post("/acoustic/ambient")
 async def ambient(audio: UploadFile = File(...)) -> Dict[str, Any]:
@@ -225,9 +296,70 @@ async def ambient(audio: UploadFile = File(...)) -> Dict[str, Any]:
 
 
 @app.post("/acoustic/classify")
-async def acoustic_classify(audio: UploadFile = File(...)) -> Dict[str, Any]:
+async def acoustic_classify(audio: UploadFile = File(...),
+                            capture_method: str = Form("unknown")) -> Dict[str, Any]:
     with _tmp_upload(audio) as path:
-        return classify_acoustic(str(path))
+        return classify_acoustic(str(path), capture_method=capture_method)
+
+
+# ------------------------------------------------- live data-collection mode
+@app.post("/acoustic/collect")
+async def acoustic_collect(audio: UploadFile = File(...),
+                           onion_id: str = Form(...),
+                           capture_method: str = Form("phone_tap"),
+                           position: str = Form("equator"),
+                           device: str = Form(""),
+                           os_version: str = Form(""),
+                           notes: str = Form("")) -> Dict[str, Any]:
+    """Save one real recording (copy-only) with its per-WAV metadata sidecar.
+
+    This is the data-collection path of the scan page: every saved WAV lands in
+    dataset-acoustic/raw/<ONION_ID>/ in exactly the format
+    training/train_acoustic.py reads (ONION id in the filename, label sidecar
+    next to the file). internal_label stays null until the cut-open step.
+    """
+    from src.acoustic.collection import save_recording
+    with _tmp_upload(audio) as path:
+        try:
+            return save_recording(
+                wav_bytes=path.read_bytes(), onion_id=onion_id,
+                capture_method=capture_method, position=position,
+                device=device, os_version=os_version, notes=notes)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.get("/acoustic/collection-status")
+def acoustic_collection_status() -> Dict[str, Any]:
+    """Honest trainability summary: verified onions vs the 30-onion minimum."""
+    from src.acoustic.collection import collection_status
+    return collection_status()
+
+
+@app.post("/acoustic/ground-truth")
+async def acoustic_ground_truth(onion_id: str = Form(...),
+                                internal_label: str = Form(...),
+                                labelled_by: str = Form(...),
+                                method: str = Form("cut_open"),
+                                notes: str = Form(""),
+                                photograph: Optional[UploadFile] = File(None)) -> Dict[str, Any]:
+    """Cut-open ground truth: the only endpoint that may set internal_label.
+
+    Multipart form so the scan page can upload the cut-surface photograph as
+    evidence alongside the label.
+    """
+    from src.acoustic.collection import record_ground_truth
+    with _tmp_upload(photograph) as photo_path:
+        try:
+            return record_ground_truth(
+                onion_id=onion_id,
+                internal_label=internal_label,
+                labelled_by=labelled_by,
+                photograph=photo_path,
+                method=method,
+                notes=notes)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc))
 
 
 @app.post("/fuse")
