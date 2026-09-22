@@ -1,124 +1,104 @@
-# ONION-Q — AI-assisted onion procurement grading
+# ONION-Q — AI-Assisted Onion Quality Grading (SIH26031)
 
-**SIH26031.** A measure → decide → audit workflow for onion procurement-centre
-inspectors: a phone camera (and optionally the phone's own speaker/microphone)
-produces *measurements*, a **versioned standards engine** turns them into a
-procurement decision, and every uncertain onion is escalated for human review
-with the reason attached.
+## What this is
 
-> Models measure. Policy decides. Uncertainty is never hidden.
+A procurement-grade onion inspection system built around three honest
+principles:
 
-```bash
-python -m venv .venv && . .venv/Scripts/activate      # Windows (bash)
-pip install -r requirements.txt
-python scripts/clean_clone_smoke_test.py              # proves the clone is self-contained
-python -m pytest tests server/tests -q                # full suite
-python scripts/demo_batch_scan.py --compose 9 --lot LOT-2026-0182
-```
+- **No black-box output.** Every decision comes from a trained model, a
+  configurable policy, or an explicit "I can't answer yet" status.
+- **No fabricated labels.** Models are trained only on the labels that exist
+  in the tracked datasets; the rest are deliberately absent and documented.
+- **No hidden local data.** A clean clone runs the full test suite; the
+  reproducibility smoke test enforces that.
 
----
+## Two-tier design
 
-## What it does
+**Tier 1 (required):** camera-only onion detection, visible-defect
+classification, calibrated size measurement, configurable Grade A / URS rule
+engine, batch percentages, and an evidence-backed digital report with QR
+code, policy version, and audit trail.
 
-| Mode | Input | Output |
-|---|---|---|
-| **Quick Batch Scan** | one or more tray images (calibration mat in frame) | onions detected, per-onion size + visible attributes, capture-quality warnings, policy decision, batch percentages |
-| **Deep Scan** | 4 guided views of one onion (neck / base / side A / side B) + optional phone acoustic test | multi-view fusion, acoustic evidence with quality score, confidence-aware fusion, decision or `manual_review` |
-| **Report** | any batch | tamper-evident JSON + farmer-language markdown + QR verification payload |
-| **Sync** | field device | offline-first journal → idempotent API ingest → centre dashboard |
+**Tier 2 (differentiator):** phone-only acoustic hidden-defect screening
+using the built-in speaker and microphone — with a clearly labelled
+synthetic-demo acoustic model until real labelled onion data exists.
 
-## The one architectural idea
+## Current model status (honest)
 
-```
-IMAGE / AUDIO  →  MODELS  →  MEASUREMENTS  →  POLICY ENGINE  →  DECISION  →  REPORT
-                                (numbers)      (JSON, hashed)    (grade/reject/review)
-```
+- **Vision detector:** Faster R-CNN + MobileNet V3 Large 320 FPN, single
+  class `onion`. Test mAP@0.50 = 0.639, F1@0.5 = 0.656. Model card documents
+  the limitations.
+- **Vision attribute model:** MobileNetV3-Small with 4-class commercial
+  quality head + rotten + sprout binary heads, trained on real labels only.
+  Defect heads are the strong story: rot F1 0.928, sprout F1 0.784 on the
+  carveout evaluation. The 4-class head is weak (~0.32 accuracy) and that is
+  documented, not hidden.
+- **Acoustic model:** classical Random Forest on real DSP features, **synthetic
+  demo only** today. Model card says explicitly it is not an onion
+  internal-defect classifier. The pipeline (capture → gate → features → model
+  → fusion) works and is tested; the model needs verified onion ground truth.
+- **Policy engine:** separate from the models. Converts measurements + a
+  versioned policy into a decision with reason codes. Demo policy thresholds
+  are marked `source_verified: false` and the code enforces that verified
+  policies need an official source.
 
-Because the standards live in `config/grading/*.json` and every decision records
-`policy_id`, `policy_version` and `policy_hash`:
+## Honest gaps
 
-* changing a government threshold is a **configuration change**, not retraining;
-* old measurements can be re-evaluated under a future standard;
-* an auditor can see *why* produce was rejected, in plain language.
+- Non-onion rejection is tested and honest, strongest when the detector
+  artifact and embedding OOD reference are both present.
+- Grade A / URS is policy-driven, not model-driven; demo thresholds are marked
+  unverified.
+- The acoustic model is synthetic until the 30-onion collection day produces
+  cut-open ground truth.
+- Shelf life / decay is not modelled — no longitudinal labels exist.
 
-```bash
-make batch                                   # demo policy
-python scripts/demo_batch_scan.py --images demo/tray_calibrated.png \
-    --policy strict_with_segmentation        # stricter rules, same models
-```
+## Run the CI gate locally
 
-## Honest status (read before believing any number)
+    python scripts/run_ci_gate.py
 
-| Item | Status |
-|---|---|
-| Onion detector | **Real**, trained on 2,622 leak-free images. AP@0.50 = 0.639 on a grouped leak-safe split (`experimental`, not field-ready — `docs/MODEL_CARDS.md`) |
-| `rotten` / `sprout` attributes | **Real signal**: F1 0.928 / 0.784 on a leak-free split |
-| 4-class commercial grade | macro-F1 0.312 (chance ≈ 0.25) — reported, **not used** for decisions |
-| Size measurement | ArUco-calibrated only; otherwise an explicitly labelled pixel estimate |
-| Acoustic internal defects | **Not validated.** No public onion acoustic dataset exists; the shipped model is a **synthetic demo** and cannot change a grade |
-| Shelf-life / freshness score | **Does not exist** — no longitudinal labels. `freshness_score` is `null` everywhere |
-| Reports | **Tamper-evident**, not tamper-proof |
-| Field validation | **None yet** |
+That replays exactly what GitHub Actions runs: reproducibility smoke test,
+module imports, unit + integration + contract tests, and the grading /
+report-integrity gate.
 
-Full detail: [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md) ·
-[`docs/MODEL_CARDS.md`](docs/MODEL_CARDS.md) ·
-[`docs/AUDIT_REPORT.md`](docs/AUDIT_REPORT.md)
+## Training commands
 
-## Layout
+    python training/train_detector.py --model-id vision-detector-v0.2 \
+        --epochs 8 --min-size 320 --batch-size 4
 
-```
-src/data/         dataset registry, label mapping, leak-free splits, provenance
-src/vision/       detector, attribute model, multi-view fusion, size, capture QC, rejection
-src/acoustic/     WAV loading, quality gates, FFT/STFT/log-mel features
-src/fusion/       confidence-aware multimodal fusion
-src/grading/      policy engine, reason codes, batch aggregation
-src/reporting/    report generator, canonical hashing, QR payload
-src/mobile/       guided capture protocol, offline-first journal
-inference/        app-facing API (batch / deep / combined scan)
-training/         detector, attribute and acoustic trainers
-server/           FastAPI service (same functions the app calls)
-dashboard/        static centre dashboard
-mobile/android/   Kotlin reference implementation (not compiled)
-docs/             architecture, datasets, model cards, workflow, demo script, judge Q&A
-config/grading/   versioned procurement policies
-dataset/          partitioned image dataset (MANIFEST.csv, part-001…018)
-dataset-acoustic/ acoustic sources, protocol, synthetic demo, research notes
-```
+    python training/train_attribute_model.py --epochs 4 --split-mode grouped
 
-## Commands
+    python training/train_acoustic.py \
+        --data dataset-acoustic/synthetic/demo_chirp_responses
 
-```bash
-make smoke                 # clean-clone self-containment check
-make test                  # all tests
-make fixtures              # calibration mat + composed tray fixture
-make batch                 # batch scan demo → report
-make deep                  # deep scan demo (views + audio)
-make report && make verify # generate and verify a report hash
-make registry              # regenerate models/registry.json
-make train-detector        # longer detector training (documented improvement)
-make api                   # uvicorn server.app:app --port 8000
-make dashboard             # static dashboard on :8081
-```
+    python scripts/demo_onion_scan.py --image <path> [--audio <path>]
 
-## What the inspector must still do
+## Repository status
 
-Place the calibration mat, keep onions separated, act on capture-quality
-guidance, and resolve every `manual_review` onion by hand. The system never
-forces a decision on uncertain evidence — that is a design decision, not a
-missing feature.
+- Branch: `sih-winning-system`
+- Latest commit: `1dfaed2c467629439c7a68368fca71337ff9b9b4`
+- GitHub Actions on that commit: **success**
+  (<https://github.com/GaneshNair007/Onion-grading-deeplearning-SIH-/actions/runs/35667007608>)
 
-## Repository branches
+## Dataset
 
-* `dataset` — the partitioned image dataset
-* `acoustic-data` — acoustic sources, protocol and DSP pipeline
-* `sih-winning-system` — this consolidated build
+- Partitioned onion training dataset: 20,054 files, 18 parts
+  (`dataset/part-001`…`dataset/part-018`), every file below GitHub's 100 MB
+  limit, largest single file under 2 MB.
+- Sources inside the parts:
+  - `onion-grading-coco-segmentation` (CC BY 4.0, Roboflow)
+  - `onion-coco-mmdetection` (Public Domain, Roboflow)
+  - `onion-leaves-and-bulb` (no license metadata — verify before
+    redistribution)
+- Acoustic data directory `dataset-acoustic/` is a separate, clearly labelled
+  pipeline for the phone-only acoustic path. No verified onion acoustic data
+  exists yet; the directory documents exactly what is and isn't there.
 
-## Licence and data notice
+## Documentation
 
-Training images: Roboflow *Onion Grading v7* (CC BY 4.0) and *onions v1*
-(Public Domain), recorded in `dataset/LICENSES_AND_SOURCES.md`. The
-*Onion Leaves and Bulb* source has **no detected licence** and is excluded from
-training until verified. Acoustic sources: see `dataset-acoustic/LICENSES.md`
-(coconut tapping data is CC BY-NC-ND and is **not** redistributed).
-GitHub is not a dataset repository; `dataset/` is a convenience mirror, not a
-DOI-bearing archive.
+- `docs/JUDGE_REHEARSAL.md` — what to say, what's true, what's missing.
+- `docs/ONION_Q_TECHNICAL_WHITEPAPER.md` — full technical writeup.
+- `dataset/README.md` — dataset provenance, part sizes, checksums.
+- `dataset-acoustic/README.md` — acoustic pipeline status and collection
+  protocol.
+- `config/grading/demo_policy.json` — the active demo policy with reason
+  codes.

@@ -27,8 +27,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          # CI-only extras: keep the runtime requirements file honest.
-          pip install pytest scipy scikit-learn joblib
+          pip install pytest
 
       - name: Reproducibility smoke test (no untracked files required)
         run: python scripts/clean_clone_smoke_test.py
