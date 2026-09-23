@@ -46,6 +46,27 @@ def test_missing_detector_reports_unavailable_and_grades_nothing(tray_image, pol
                for w in result["warnings"])
 
 
+def test_zero_detections_are_not_reported_as_success(tray_image, policy,
+                                                     monkeypatch):
+    """A detector miss must not become an empty 0%-everywhere grade."""
+    monkeypatch.setattr(
+        "src.vision.detector.detect_onions",
+        lambda *a, **k: {
+            "status": "success", "instances": [], "onion_count": 0,
+            "image_size": [1200, 900], "score_threshold": 0.5,
+            "model_version": "test", "warnings": [],
+        })
+
+    image_result = scan_image(str(tray_image), policy)
+    assert image_result["status"] == "no_onion_detected"
+    assert image_result["onions"] == []
+
+    batch_result = scan_batch([str(tray_image)], policy)
+    assert batch_result["status"] == "no_onion_detected"
+    assert batch_result["batch"]["totals"]["total_detected"] == 0
+    assert "No procurement grade" in batch_result["message"]
+
+
 @needs_detector
 def test_batch_scan_produces_instances_measurements_and_decisions(tray_image, policy):
     result = scan_batch([str(tray_image)], policy, center_id="TEST-CTR",

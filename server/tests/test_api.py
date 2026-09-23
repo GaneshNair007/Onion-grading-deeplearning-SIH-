@@ -190,6 +190,28 @@ def test_scan_image_requires_a_model_and_says_so(client, real_onion_image):
         det.resolve_detector = original  # type: ignore
 
 
+def test_empty_batch_does_not_generate_report_or_annotation(client, real_onion_image,
+                                                            monkeypatch):
+    """Zero detections are an explicit refusal, never an empty report."""
+    monkeypatch.setattr(app_module, "scan_tray_batch", lambda *a, **k: {
+        "status": "no_onion_detected",
+        "message": "No onion was detected with sufficient confidence.",
+        "batch": {"totals": {"total_detected": 0}, "counts": {},
+                  "percentages": {}},
+        "images": [], "onions": [], "policy": {}, "warnings": [],
+    })
+    with open(real_onion_image, "rb") as fh:
+        response = client.post(
+            "/scan/batch",
+            files={"images": ("not-detected.jpg", fh, "image/jpeg")},
+            data={"policy": "demo_policy"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "no_onion_detected"
+    assert body["report"] is None
+    assert body["annotated_images"] == []
+
+
 def test_fuse_endpoint_returns_manual_review_on_disagreement(client):
     """Eligible (verified-onion) acoustic evidence may escalate to review."""
     body = client.post("/fuse", json={

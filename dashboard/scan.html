@@ -16,7 +16,7 @@
                  padding:6px 10px; border-radius:8px; font-size:13px; margin-bottom:14px; }
   .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:14px; }
   .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; }
-  video,canvas { width:100%; border-radius:8px; background:#000; max-height:340px; object-fit:contain; }
+  video,canvas,.capture-preview { width:100%; border-radius:8px; background:#000; max-height:340px; object-fit:contain; }
   button { font:inherit; padding:9px 14px; border-radius:8px; border:1px solid var(--line);
            background:#21262d; color:var(--fg); cursor:pointer; margin:4px 4px 4px 0; }
   button.primary { background:#1f6feb; border-color:#1f6feb; color:#fff; }
@@ -49,6 +49,7 @@ Acoustic result is <b>research-only</b> (synthetic-trained model) and can never 
   <section class="card">
     <h2>1 · Camera (computer vision)</h2>
     <video id="cam" autoplay playsinline muted></video>
+    <img id="filePreview" class="capture-preview" alt="Selected scan image" hidden />
     <canvas id="snap" hidden></canvas>
     <div style="margin-top:8px">
       <button id="startCam">Start camera</button>
@@ -190,6 +191,7 @@ const API = window.location.origin; // same origin as this page (served by the A
 let stream = null, frame = null; // frame: Blob (image/jpeg)
 $("startCam").onclick = async () => {
   try {
+    $("filePreview").hidden = true; $("cam").hidden = false;
     stream = await navigator.mediaDevices.getUserMedia(
       { video: { facingMode: "environment", width: {ideal:1280} }, audio: false });
     $("cam").srcObject = stream;
@@ -206,6 +208,12 @@ $("capture").onclick = () => {
 };
 $("file").onchange = e => { frame = e.target.files[0] || null;
   $("scan").disabled = !frame;
+  if (frame) {
+    $("filePreview").src = URL.createObjectURL(frame);
+    $("filePreview").hidden = false; $("cam").hidden = true;
+  } else {
+    $("filePreview").hidden = true; $("cam").hidden = false;
+  }
   $("camState").textContent = frame ? "File selected: " + frame.name : "No file."; };
 $("mode").onchange = e => $("batchFields").hidden = e.target.value !== "batch";
 
@@ -237,6 +245,19 @@ const gradeBadge = d => d === "grade_a" ? badge("GRADE A", "b-ok")
 
 function renderVision(out, single) {
   let h = "";
+  if (out.status === "no_onion_detected") {
+    h += '<div style="margin:6px 0 10px">' + badge("NO ONION DETECTED", "b-bad") + "</div>";
+    h += '<p class="muted">' + (out.message || "No onion was detected with sufficient confidence.") + "</p>";
+    h += '<p class="muted">No procurement grade or report was generated. Use a closer image with the whole onion clearly visible and even lighting.</p>';
+    $("visionOut").innerHTML = h;
+    return;
+  }
+  if (out.status === "model_unavailable") {
+    h += '<div style="margin:6px 0 10px">' + badge("MODEL UNAVAILABLE", "b-bad") + "</div>";
+    h += '<p class="muted">' + (out.message || "The detector is unavailable. No grade was generated.") + "</p>";
+    $("visionOut").innerHTML = h;
+    return;
+  }
   if (single) {
     // Real API shape: { status, is_onion, onion: { vision, size, measurements, decision, ... } }
     const r = out.onion || {};

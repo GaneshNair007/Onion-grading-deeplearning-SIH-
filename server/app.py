@@ -187,6 +187,10 @@ async def scan_batch(images: List[UploadFile] = File(...),
                                  inspector_id=inspector_id, batch_id=batch_id,
                                  lot_id=lot_id,
                                  require_calibration=require_calibration)
+        if not result.get("onions"):
+            result["report"] = None
+            result["annotated_images"] = []
+            return result
         persisted = persist_annotated_evidence(
             [str(p) for p in paths], result, _report_files_dir)
     evidence = []
