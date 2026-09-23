@@ -35,6 +35,8 @@
   .err { color:var(--bad); font-size:13px; white-space:pre-wrap; }
   .ok-note { color:var(--ok); font-size:13px; }
   audio { width:100%; margin-top:6px; }
+  .evidence-image { width:100%; margin-top:10px; border:1px solid var(--line);
+                    border-radius:8px; background:#000; }
 </style>
 </head>
 <body>
@@ -268,6 +270,8 @@ function renderVision(out, single) {
     if (b.mean_confidence != null) h += kv("mean confidence", b.mean_confidence);
     if (rep.report_id) h += kv("report", rep.report_id);
     if (rep.report_hash) h += kv("integrity hash", String(rep.report_hash).slice(0,26) + "…");
+    for (const image of (out.annotated_images || []))
+      h += '<img class="evidence-image" src="' + image.url + '" alt="Annotated onion evidence" />';
     const ons = out.onions || [];
     if (ons.length) {
       h += '<table style="width:100%;font-size:13px;margin-top:8px;border-collapse:collapse">' +

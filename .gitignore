@@ -36,6 +36,7 @@ checkpoints/
 
 # ---- Test / tooling caches ----
 .pytest_cache/
+.test-tmp*/
 .evaluation_scratch/
 
 # ---- Local scratch (device offline-store data, ad-hoc runs) ----

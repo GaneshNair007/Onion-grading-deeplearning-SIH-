@@ -33,7 +33,8 @@ from inference.combined_scan import (classify_acoustic, classify_vision,  # noqa
 from server.store import Store                                      # noqa: E402
 from src.grading.policy import active_policy, available_policies    # noqa: E402
 from src.reporting.audit_hash import verify_integrity               # noqa: E402
-from src.reporting.evidence import capture_evidence                 # noqa: E402
+from src.reporting.evidence import hash_evidence                    # noqa: E402
+from src.reporting.annotation import persist_annotated_evidence     # noqa: E402
 from src.reporting.generator import build_report, finalize, write_report  # noqa: E402
 from src.vision.multi_view import GUIDED_VIEWS, view_instructions   # noqa: E402
 
@@ -77,6 +78,11 @@ _dashboard_dir = PROJECT_ROOT / "dashboard"
 if _dashboard_dir.exists():
     app.mount("/dashboard/app", StaticFiles(directory=str(_dashboard_dir), html=True),
               name="dashboard")
+
+_report_files_dir = PROJECT_ROOT / "reports" / "evidence"
+_report_files_dir.mkdir(parents=True, exist_ok=True)
+app.mount("/artifacts/evidence", StaticFiles(directory=str(_report_files_dir)),
+          name="report-evidence")
 
 
 def store() -> Store:
@@ -170,6 +176,7 @@ async def scan_image(image: UploadFile = File(...),
 async def scan_batch(images: List[UploadFile] = File(...),
                      center_id: str = Form("MH-NSK"),
                      inspector_id: str = Form("INSP-001"),
+                     batch_id: Optional[str] = Form(None),
                      lot_id: Optional[str] = Form(None),
                      policy: str = Form("demo_policy"),
                      require_calibration: bool = Form(True)) -> Dict[str, Any]:
@@ -177,15 +184,28 @@ async def scan_batch(images: List[UploadFile] = File(...),
         raise HTTPException(status_code=400, detail="no images supplied")
     with _tmp_uploads(images) as paths:
         result = scan_tray_batch(paths, policy, center_id=center_id,
-                                 inspector_id=inspector_id, lot_id=lot_id,
+                                 inspector_id=inspector_id, batch_id=batch_id,
+                                 lot_id=lot_id,
                                  require_calibration=require_calibration)
+        persisted = persist_annotated_evidence(
+            [str(p) for p in paths], result, _report_files_dir)
+    evidence = []
+    annotated_images = []
+    for item in persisted:
+        evidence.append(hash_evidence("original_image", item["original_path"]))
+        evidence.append(hash_evidence("annotated_image", item["annotated_path"]))
+        name = Path(item["annotated_path"]).name
+        annotated_images.append({
+            "url": f"/artifacts/evidence/{name}",
+            "filename": name,
+        })
     report = finalize(build_report(
         result["batch"],
         [{"onion_id": o["onion_id"], "source_image": o["source_image"],
           "decision": o["decision"]["decision"],
           "reason_codes": o["decision"]["reason_codes"],
           "measurements": o["measurements"]} for o in result["onions"]],
-        evidence=capture_evidence(result["images"]),
+        evidence=evidence,
         demo_mode=not result["policy"].get("source_verified", False),
         app_version=APP_VERSION))
     write_report(report, PROJECT_ROOT / "reports")
@@ -193,6 +213,7 @@ async def scan_batch(images: List[UploadFile] = File(...),
     result["report"] = {"report_id": report["report_id"],
                         "report_hash": report["integrity"]["canonical_hash"],
                         "qr_payload": report["qr_payload"]}
+    result["annotated_images"] = annotated_images
     return result
 
 
