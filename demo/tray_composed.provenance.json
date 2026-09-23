@@ -36,7 +36,7 @@
     ],
     "critical_note": "The px/mm scale is the FIXTURE's scale. Sizes measured on this montage are NOT the photographed onions' real physical sizes, which are unknown because each crop came from a different unknown camera distance."
   },
-  "onions_placed": 9,
+  "onions_placed": 12,
   "onion_placements": [
     {
       "dataset_image": "dataset\\part-001\\onion-coco-mmdetection\\train\\img_va1_png_jpg.rf.4264e48059841f8522fe01b9d397b1e0.jpg",
@@ -163,6 +163,50 @@
       ],
       "source_categories": [
         "rotten",
+        "sprout"
+      ]
+    },
+    {
+      "dataset_image": "dataset\\part-001\\onion-coco-mmdetection\\train\\img_tr5_png_jpg.rf.4f3f79eb7fe63544d66a6374410cca1c.jpg",
+      "source_group": null,
+      "sha256_of_source": null,
+      "bbox_xywh_in_montage": [
+        366,
+        664,
+        191,
+        191
+      ],
+      "source_categories": [
+        "rotten",
+        "sprout"
+      ]
+    },
+    {
+      "dataset_image": "dataset\\part-001\\onion-coco-mmdetection\\train\\img_tr4_png_jpg.rf.a9bdbac6ad8838942a0d9a5ea2525475.jpg",
+      "source_group": null,
+      "sha256_of_source": null,
+      "bbox_xywh_in_montage": [
+        633,
+        655,
+        214,
+        214
+      ],
+      "source_categories": [
+        "rotten",
+        "sprout"
+      ]
+    },
+    {
+      "dataset_image": "dataset\\part-001\\onion-coco-mmdetection\\train\\img_va36_jpeg_jpg.rf.bd1389d56dc810a21fe1522ee0cf5d01.jpg",
+      "source_group": null,
+      "sha256_of_source": null,
+      "bbox_xywh_in_montage": [
+        955,
+        658,
+        200,
+        200
+      ],
+      "source_categories": [
         "sprout"
       ]
     }
