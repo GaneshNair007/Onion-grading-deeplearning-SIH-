@@ -1,0 +1,306 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ════════════════════════════════════════════════
+   BASE LAYER — Global Resets & Typography
+   ════════════════════════════════════════════════ */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    background-color: #FEFCFB;
+  }
+
+  body {
+    background-color: #FEFCFB;
+    color: #2D1F1A;
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    line-height: 1.7;
+    letter-spacing: 0.01em;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Playfair Display', Georgia, serif;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: #2D1F1A;
+  }
+
+  /* Elegant warm scrollbar */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(212, 104, 122, 0.25); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(212, 104, 122, 0.5); }
+
+  ::selection {
+    background: rgba(212, 104, 122, 0.18);
+    color: #2D1F1A;
+  }
+}
+
+/* ════════════════════════════════════════════════
+   COMPONENTS — Reusable Design Primitives
+   ════════════════════════════════════════════════ */
+@layer components {
+
+  /* ── Glass Card ── */
+  .glass-card {
+    background: rgba(255, 252, 251, 0.6);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(180, 140, 130, 0.1);
+    box-shadow: 0 8px 40px -12px rgba(180, 140, 130, 0.1);
+    border-radius: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .glass-card:hover {
+    box-shadow: 0 16px 60px -16px rgba(180, 140, 130, 0.16);
+    border-color: rgba(212, 104, 122, 0.12);
+  }
+
+  /* ── Glass Navigation ── */
+  .glass-nav {
+    background: rgba(254, 252, 251, 0.8);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border-bottom: 1px solid rgba(180, 140, 130, 0.08);
+  }
+
+  /* ── Buttons ── */
+  .btn-premium {
+    background: linear-gradient(135deg, rgba(212, 104, 122, 0.08) 0%, rgba(232, 223, 254, 0.15) 100%);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(212, 104, 122, 0.15);
+    color: #2D1F1A;
+    padding: 14px 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    border-radius: 100px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 16px rgba(212, 104, 122, 0.08);
+    cursor: pointer;
+  }
+
+  .btn-premium:hover {
+    background: linear-gradient(135deg, rgba(212, 104, 122, 0.15) 0%, rgba(232, 223, 254, 0.25) 100%);
+    border-color: rgba(212, 104, 122, 0.25);
+    box-shadow: 0 8px 32px rgba(212, 104, 122, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .btn-premium:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-onion {
+    background: linear-gradient(135deg, #D4687A 0%, #B8475D 100%);
+    color: white;
+    padding: 14px 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    border-radius: 100px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 8px 24px -4px rgba(212, 104, 122, 0.3);
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-onion:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 36px -4px rgba(212, 104, 122, 0.4);
+  }
+
+  /* ── Section Label ── */
+  .section-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #D4687A;
+  }
+
+  /* ── Pastel Tag ── */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+
+  .tag-pink {
+    background: rgba(242, 206, 212, 0.4);
+    color: #B8475D;
+    border: 1px solid rgba(212, 104, 122, 0.15);
+  }
+
+  .tag-sage {
+    background: rgba(216, 237, 218, 0.5);
+    color: #3A7A4A;
+    border: 1px solid rgba(91, 166, 122, 0.15);
+  }
+
+  .tag-lavender {
+    background: rgba(232, 223, 254, 0.5);
+    color: #6B5BAD;
+    border: 1px solid rgba(139, 122, 206, 0.15);
+  }
+
+  .tag-peach {
+    background: rgba(255, 229, 217, 0.5);
+    color: #B86B3A;
+    border: 1px solid rgba(212, 145, 94, 0.15);
+  }
+
+  /* ── Stat Card ── */
+  .stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #2D1F1A;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #7A6860;
+    margin-top: 6px;
+  }
+}
+
+/* ════════════════════════════════════════════════
+   UTILITIES
+   ════════════════════════════════════════════════ */
+@layer utilities {
+  .text-gradient-onion {
+    background: linear-gradient(135deg, #D4687A 0%, #B8475D 50%, #7B93BD 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .shimmer-bg {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(212, 104, 122, 0.06) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+  }
+}
+
+/* ════════════════════════════════════════════════
+   WATER SPLASH ANIMATION
+   ════════════════════════════════════════════════ */
+.water-splash {
+  position: relative;
+  overflow: hidden;
+}
+
+.water-splash::after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  width: 300px;
+  height: 60px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(212, 104, 122, 0.12) 0%,
+    rgba(212, 104, 122, 0.04) 40%,
+    transparent 70%
+  );
+  transform: translateX(-50%);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: splash-pulse 3s ease-in-out infinite;
+}
+
+@keyframes splash-pulse {
+  0%, 100% { transform: translateX(-50%) scaleX(1) scaleY(1); opacity: 0.6; }
+  50%      { transform: translateX(-50%) scaleX(1.2) scaleY(0.8); opacity: 1; }
+}
+
+/* ── Water Ripple Effect ── */
+.water-ripple {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid rgba(212, 104, 122, 0.2);
+  animation: ripple-expand 3s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes ripple-expand {
+  0%   { width: 0; height: 0; opacity: 0.6; }
+  100% { width: 400px; height: 400px; opacity: 0; margin-left: -200px; margin-top: -200px; }
+}
+
+/* ════════════════════════════════════════════════
+   ONION PEEL SCROLL REVEAL
+   ════════════════════════════════════════════════ */
+.peel-reveal {
+  transform-origin: top center;
+  perspective: 800px;
+}
+
+/* ── Smooth entrance for scroll sections ── */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ════════════════════════════════════════════════
+   CUSTOM ANIMATIONS
+   ════════════════════════════════════════════════ */
+@keyframes float-gentle {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33%      { transform: translateY(-8px) rotate(0.5deg); }
+  66%      { transform: translateY(-4px) rotate(-0.5deg); }
+}
+
+.animate-float-gentle {
+  animation: float-gentle 8s ease-in-out infinite;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.7; }
+  50%      { opacity: 0.3; }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 3s ease-in-out infinite;
+}
