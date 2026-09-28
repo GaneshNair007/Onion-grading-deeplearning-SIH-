@@ -28,6 +28,7 @@ checkpoints/
 
 # ---- Model weights / trained artifacts ----
 *.pt
+!backend/model_backend/best.pt
 *.pth
 *.onnx
 *.h5
@@ -67,12 +68,12 @@ Onion*Dataset/
 Onion*.zip
 onions*.zip
 
-# ---- Legacy local application tree (superseded, never imported) ----
-# backend/ was present locally but untracked, and the earlier code imported from
-# it (audit P0.1). The self-contained implementation lives in src/, server/ and
-# inference/; scripts/clean_clone_smoke_test.py fails if anything imports
-# backend/ again.
-backend/
+# ---- Backups & Backend Artifacts ----
+.legacy_backend_backup/
+backend/reports/*.html
+backend/reports/*.pdf
+backend/reports/*.png
+!backend/reports/.gitkeep
 
 # ---- OS junk ----
 .DS_Store
