@@ -20,7 +20,7 @@ import numpy as np
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 DETECTOR_DIR = PROJECT_ROOT / "models" / "vision" / "detector"
 REGISTRY_PATH = PROJECT_ROOT / "models" / "registry.json"
-MODEL_ID = "vision-detector-v0.1"
+MODEL_ID = "vision-detector-v0.2"
 SCORE_THRESHOLD = 0.5
 MIN_SIZE = 480
 
@@ -41,21 +41,23 @@ def build_detector(num_classes: int = 2, pretrained: bool = True):
 
 
 def resolve_detector(explicit: Optional[str] = None) -> Optional[Path]:
+    """Use the registered deployment artifact, never an arbitrary checkpoint."""
     if explicit:
         p = Path(explicit)
-        return p if p.exists() else None
+        return p if p.is_file() else None
     if REGISTRY_PATH.exists():
         try:
             entry = json.loads(REGISTRY_PATH.read_text(encoding="utf-8")) \
                 .get("models", {}).get(MODEL_ID)
             if entry:
                 p = PROJECT_ROOT / entry["artifact_path"]
-                if p.exists():
+                if p.is_file():
                     return p
-        except (json.JSONDecodeError, KeyError):
+        except (OSError, ValueError, KeyError, TypeError, AttributeError):
             pass
-    candidates = sorted(DETECTOR_DIR.glob("*.pt")) if DETECTOR_DIR.exists() else []
-    return candidates[-1] if candidates else None
+    # last.pt can be an interrupted experiment, and older artifacts may be
+    # deprecated. Missing deployment configuration must fail closed.
+    return None
 
 
 _cache: Dict[str, Any] = {}
@@ -92,8 +94,8 @@ def detect_onions(image_path: str, model_path: Optional[str] = None,
             "status": "model_unavailable",
             "instances": [],
             "warnings": [
-                "No detector artifact found. Train with "
-                "`python training/train_detector.py`.",
+                "No registered detector artifact found. Restore the artifact "
+                "listed in models/registry.json or supply an explicit model path.",
             ],
         }
 

@@ -104,6 +104,19 @@ def scan_image(image_path: str, policy: Policy,
                                markers_detected=len(markers),
                                require_calibration=require_calibration)
 
+    if not instances:
+        return {
+            "image": str(image_path),
+            "status": "no_onion_detected",
+            "message": ("No onion could be located with sufficient confidence. "
+                        "This is inconclusive; it does not prove the image contains no onion."),
+            "detector": detection,
+            "capture_quality": quality.to_dict(),
+            "markers_detected": len(markers),
+            "onions": [],
+            "warnings": warnings,
+        }
+
     attribute_artifact = resolve_artifact(attribute_model)
     if attribute_artifact is None:
         warnings.append("No attribute model artifact: onions are detected but "
@@ -225,7 +238,22 @@ def scan_batch(image_paths: Sequence[str], policy: Policy,
                                         "acoustic": "not_used_in_batch_mode"},
                         lot_id=lot_id)
 
+    failed = [image for image in per_image if image.get("status") != "success"]
+    status = "partial_success" if all_onions and failed else "success"
+    message = None
+    if not all_onions:
+        unavailable = any(image.get("status") == "model_unavailable" for image in per_image)
+        status = "model_unavailable" if unavailable else "no_onion_detected"
+        message = ("The detector is unavailable; no grade was produced." if unavailable else
+                   "No onion could be located with sufficient confidence. "
+                   "No procurement grade or report was produced.")
+    elif failed:
+        message = "Some images could not be assessed. Counts include only detected onions."
+        warnings.append(message)
+
     return {
+        "status": status,
+        "message": message,
         "batch": summary,
         "images": per_image,
         "onions": all_onions,

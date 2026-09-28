@@ -187,33 +187,79 @@ const $ = id => document.getElementById(id);
 const API = window.location.origin; // same origin as this page (served by the API)
 
 /* ------------------------------------------------------------ camera */
-let stream = null, frame = null; // frame: Blob (image/jpeg)
+let stream = null, frame = null; // frame: Blob or uploaded File
+let imageVersion = 0, scanVersion = 0;
+function clearScanForImage() {
+  frame = null;
+  imageVersion++;
+  scanVersion++;
+  $("scan").disabled = true;
+  $("scanErr").textContent = "";
+  $("visionOut").textContent = "No scan for this image yet.";
+  $("raw").textContent = "—";
+  return imageVersion;
+}
 $("startCam").onclick = async () => {
+  const version = imageVersion;
   try {
-    stream = await navigator.mediaDevices.getUserMedia(
+    const nextStream = await navigator.mediaDevices.getUserMedia(
       { video: { facingMode: "environment", width: {ideal:1280} }, audio: false });
+    if (version !== imageVersion) { nextStream.getTracks().forEach(t => t.stop()); return; }
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    stream = nextStream;
+    clearScanForImage();
     $("cam").srcObject = stream;
+    $("cam").hidden = false; $("snap").hidden = true;
+    $("file").value = "";
     $("capture").disabled = false;
     $("camState").textContent = "Camera live.";
-  } catch (e) { $("camState").innerHTML = '<span class="err">Camera unavailable: ' + e.message + ' — use file input.</span>'; }
+  } catch (e) { $("camState").textContent = "Camera unavailable: " + e.message + " — use file input."; }
 };
 $("capture").onclick = () => {
+  const version = clearScanForImage();
   const v = $("cam"), c = $("snap");
   c.width = v.videoWidth || 640; c.height = v.videoHeight || 480;
   c.getContext("2d").drawImage(v, 0, 0, c.width, c.height);
-  c.toBlob(b => { frame = b; $("scan").disabled = false;
+  c.hidden = false; v.hidden = true; $("file").value = "";
+  c.toBlob(b => { if (version !== imageVersion) return;
+    if (!b) { $("camState").textContent = "Could not capture a frame. Try again."; return; }
+    frame = b; $("scan").disabled = false;
     $("camState").textContent = "Frame captured (" + Math.round(b.size/1024) + " KB) — ready to scan."; }, "image/jpeg", 0.92);
 };
-$("file").onchange = e => { frame = e.target.files[0] || null;
-  $("scan").disabled = !frame;
-  $("camState").textContent = frame ? "File selected: " + frame.name : "No file."; };
+$("file").onchange = e => {
+  const version = clearScanForImage(), file = e.target.files[0];
+  $("snap").hidden = true;
+  $("cam").hidden = true;
+  if (!file) { $("camState").textContent = "No file selected."; return; }
+  $("camState").textContent = "Loading selected image…";
+  const preview = new Image(), url = URL.createObjectURL(file);
+  preview.onload = () => {
+    URL.revokeObjectURL(url);
+    if (version !== imageVersion) return;
+    const c = $("snap");
+    c.width = preview.naturalWidth; c.height = preview.naturalHeight;
+    c.getContext("2d").drawImage(preview, 0, 0);
+    c.hidden = false;
+    frame = file; $("scan").disabled = false;
+    $("camState").textContent = "File selected: " + file.name;
+  };
+  preview.onerror = () => {
+    URL.revokeObjectURL(url);
+    if (version === imageVersion) $("camState").textContent = "Could not open this image. Choose a valid image file.";
+  };
+  preview.src = url;
+};
 $("mode").onchange = e => $("batchFields").hidden = e.target.value !== "batch";
+$("batchFields").hidden = $("mode").value !== "batch";
 
 /* ------------------------------------------------------------ scan */
 $("scan").onclick = async () => {
+  if (!frame) { $("scanErr").textContent = "Capture a frame or pick a file first."; return; }
+  const requestVersion = ++scanVersion;
+  $("scan").disabled = true;
   $("scanErr").textContent = ""; $("visionOut").className = "muted";
   $("visionOut").textContent = "Scanning…";
-  if (!frame) { $("scanErr").textContent = "Capture a frame or pick a file first."; return; }
+  $("raw").textContent = "—";
   try {
     const fd = new FormData();
     const single = $("mode").value === "single";
@@ -224,25 +270,43 @@ $("scan").onclick = async () => {
                           { method:"POST", body: fd });
     if (!r.ok) throw new Error(r.status + " " + (await r.text()).slice(0,200));
     const out = await r.json();
+    if (requestVersion !== scanVersion) return;
     renderVision(out, single); $("raw").textContent = JSON.stringify(out, null, 2);
-  } catch (e) { $("visionOut").textContent = ""; $("scanErr").textContent = "Scan failed: " + e.message; }
+  } catch (e) {
+    if (requestVersion !== scanVersion) return;
+    $("visionOut").textContent = "Scan unavailable. No grade assigned.";
+    $("scanErr").textContent = "Scan failed: " + e.message;
+  } finally { if (requestVersion === scanVersion) $("scan").disabled = !frame; }
 };
 
 const badge = (t, cls) => '<span class="badge ' + cls + '">' + t + "</span>";
 const gradeBadge = d => d === "grade_a" ? badge("GRADE A", "b-ok")
   : d === "relaxed" ? badge("RELAXED / POLICY B", "b-warn")
   : d === "reject" ? badge("REJECT", "b-bad")
-  : d === "not_onion" ? badge("NOT AN ONION", "b-bad")
-  : badge("MANUAL REVIEW", "b-warn");
+  : d === "manual_review" ? badge("MANUAL REVIEW", "b-warn")
+  : badge("NO GRADE", "b-dim");
 
 function renderVision(out, single) {
+  const onions = Array.isArray(out.onions) ? out.onions : [];
+  const unavailable = out.status === "model_unavailable" || out.detector?.status === "model_unavailable"
+    || (!single && !onions.length && (out.images || []).some(i => i.status === "model_unavailable"));
+  const inconclusive = ["no_onion_detected", "detection_inconclusive"].includes(out.status)
+    || (single ? !out.onion || out.is_onion !== true : !onions.length);
+  if (unavailable || inconclusive) {
+    $("visionOut").innerHTML = '<div style="margin:6px 0 10px">' +
+      badge(unavailable ? "MODEL UNAVAILABLE" : "DETECTION INCONCLUSIVE", "b-warn") + '</div>' +
+      '<p>' + (unavailable
+        ? 'The detection model could not run. Check that the backend has loaded its model, then retry.'
+        : 'The detector did not identify an onion with sufficient confidence. This does not mean the image is not an onion. Try another clear image with the whole onion visible, or request a human review.') +
+      '</p><p class="muted">No grade assigned. No grading report is available for this scan.</p>';
+    return;
+  }
   let h = "";
   if (single) {
     // Real API shape: { status, is_onion, onion: { vision, size, measurements, decision, ... } }
     const r = out.onion || {};
     h += '<div style="margin:6px 0 10px">' + gradeBadge((r.decision||{}).decision) + "</div>";
-    h += kv("is_onion", out.is_onion === true ? "yes (detector gate)" :
-          out.is_onion === false ? "NO — NOT AN ONION" : "uncertain");
+    h += kv("onion detection", "identified by detector");
     const v = r.vision || {};
     h += kv("visible label", (v.label ?? "—") + " · conf " + (v.confidence ?? "—"));
     for (const [k,d] of Object.entries(v.defects || {}))
@@ -272,7 +336,7 @@ function renderVision(out, single) {
     if (rep.report_hash) h += kv("integrity hash", String(rep.report_hash).slice(0,26) + "…");
     for (const image of (out.annotated_images || []))
       h += '<img class="evidence-image" src="' + image.url + '" alt="Annotated onion evidence" />';
-    const ons = out.onions || [];
+    const ons = onions;
     if (ons.length) {
       h += '<table style="width:100%;font-size:13px;margin-top:8px;border-collapse:collapse">' +
         '<tr style="color:var(--dim)"><td>onion</td><td>decision</td><td>diameter</td><td>detected defects</td></tr>';

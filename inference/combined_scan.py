@@ -73,9 +73,11 @@ def scan_onion_image(image_path: str, policy: Optional[Any] = None,
         }
     return {
         "status": result["status"],
-        "is_onion": False,
+        "is_onion": None,  # A missed detection is not evidence of a non-onion.
         "onion": None,
         "decision": None,
+        "message": result.get("message"),
+        "detector": result.get("detector"),
         "capture_quality": result.get("capture_quality"),
         "warnings": result.get("warnings", []),
     }

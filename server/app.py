@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -112,6 +112,11 @@ def _registry_summary() -> Dict[str, Any]:
 
 
 # --------------------------------------------------------------------- meta
+@app.get("/")
+def root():
+    return RedirectResponse(url="/dashboard/app/scan.html")
+
+
 @app.get("/health")
 def health() -> Dict[str, Any]:
     return {"status": "ok", "app_version": APP_VERSION}
@@ -187,6 +192,10 @@ async def scan_batch(images: List[UploadFile] = File(...),
                                  inspector_id=inspector_id, batch_id=batch_id,
                                  lot_id=lot_id,
                                  require_calibration=require_calibration)
+        if not result.get("onions"):
+            result["report"] = None
+            result["annotated_images"] = []
+            return result
         persisted = persist_annotated_evidence(
             [str(p) for p in paths], result, _report_files_dir)
     evidence = []
