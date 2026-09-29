@@ -91,8 +91,16 @@ export default function CoreStorySequence() {
                 {/* Peel effect wrapper */}
                 <div className="relative">
                   {/* Background peel layer (decorative) */}
-                  <div className="absolute inset-4 rounded-3xl bg-onion-soft/50 transform rotate-2 group-hover:rotate-3 transition-transform duration-700" />
-                  <div className="absolute inset-2 rounded-3xl bg-onion-light/30 transform -rotate-1 group-hover:-rotate-2 transition-transform duration-700" />
+                  <motion.div
+                    animate={{ rotate: [2, 3.5, 2], scale: [1, 1.01, 1] }}
+                    transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+                    className="absolute inset-4 rounded-3xl bg-onion-soft/50 pointer-events-none"
+                  />
+                  <motion.div
+                    animate={{ rotate: [-1, -2.5, -1], scale: [1, 1.01, 1] }}
+                    transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+                    className="absolute inset-2 rounded-3xl bg-onion-light/30 pointer-events-none"
+                  />
                   
                   {/* Main Image */}
                   <div className="relative rounded-3xl overflow-hidden border border-glass-border shadow-glass">
@@ -107,9 +115,13 @@ export default function CoreStorySequence() {
                 </div>
 
                 {/* Step number floating badge */}
-                <div className="absolute -top-4 -left-4 w-14 h-14 rounded-2xl bg-white shadow-blush flex items-center justify-center border border-onion/10 z-10">
+                <motion.div
+                  animate={{ y: [0, -6, 0] }}
+                  transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.4 }}
+                  className="absolute -top-4 -left-4 w-14 h-14 rounded-2xl bg-white shadow-blush flex items-center justify-center border border-onion/10 z-10"
+                >
                   <span className="font-display text-xl font-semibold text-onion">{step.num}</span>
-                </div>
+                </motion.div>
               </motion.div>
 
               {/* Text Side */}

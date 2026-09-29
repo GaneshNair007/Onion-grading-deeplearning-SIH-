@@ -21,9 +21,36 @@ export default function CinematicHero() {
         </video>
       </motion.div>
 
-      {/* Decorative floating circles */}
-      <div className="absolute top-1/4 right-1/4 w-[350px] h-[350px] rounded-full bg-onion-light/30 blur-[100px] pointer-events-none animate-float" />
-      <div className="absolute bottom-1/3 left-1/4 w-[250px] h-[250px] rounded-full bg-pastel-lavender/30 blur-[80px] pointer-events-none animate-float" style={{ animationDelay: '2s' }} />
+      {/* Decorative floating circles looping in motion */}
+      <motion.div
+        animate={{
+          y: [0, -25, 0],
+          x: [0, 15, 0],
+          scale: [1, 1.08, 1],
+          opacity: [0.25, 0.45, 0.25],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+        className="absolute top-1/4 right-1/4 w-[350px] h-[350px] rounded-full bg-onion-light/40 blur-[100px] pointer-events-none"
+      />
+      <motion.div
+        animate={{
+          y: [0, 25, 0],
+          x: [0, -15, 0],
+          scale: [1, 1.1, 1],
+          opacity: [0.2, 0.4, 0.2],
+        }}
+        transition={{
+          duration: 9,
+          repeat: Infinity,
+          ease: 'easeInOut',
+          delay: 1,
+        }}
+        className="absolute bottom-1/3 left-1/4 w-[280px] h-[280px] rounded-full bg-pastel-lavender/40 blur-[80px] pointer-events-none"
+      />
 
       {/* Water Splash Effect at bottom */}
       <div className="absolute bottom-0 left-0 right-0 h-20 water-splash pointer-events-none z-30" />

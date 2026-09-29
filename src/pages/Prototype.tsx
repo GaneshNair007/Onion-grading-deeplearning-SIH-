@@ -628,6 +628,44 @@ export default function Prototype() {
                 className="w-full h-full min-h-[440px] max-h-[560px] object-contain transition-transform duration-700"
               />
 
+              {/* Looping Frame Motion Scanning Laser Beam */}
+              <motion.div
+                animate={{
+                  top: ['2%', '96%', '2%'],
+                }}
+                transition={{
+                  duration: 3.2,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+                className="absolute left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_16px_#00C8FF] z-10 pointer-events-none"
+              />
+
+              {/* Looping HUD Reticle Brackets */}
+              <motion.div
+                animate={{
+                  opacity: [0.4, 0.95, 0.4],
+                  scale: [0.995, 1, 0.995],
+                }}
+                transition={{
+                  duration: 2.4,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+                className="absolute inset-5 pointer-events-none z-10"
+              >
+                <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-cyan-400/90 rounded-tl" />
+                <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-cyan-400/90 rounded-tr" />
+                <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-cyan-400/90 rounded-bl" />
+                <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-cyan-400/90 rounded-br" />
+                
+                {/* Horizontal & vertical crosshairs */}
+                <div className="absolute top-1/2 left-0 w-3 h-px bg-cyan-400/40" />
+                <div className="absolute top-1/2 right-0 w-3 h-px bg-cyan-400/40" />
+                <div className="absolute top-0 left-1/2 h-3 w-px bg-cyan-400/40" />
+                <div className="absolute bottom-0 left-1/2 h-3 w-px bg-cyan-400/40" />
+              </motion.div>
+
               {/* View Overlay Tag */}
               <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 flex items-center gap-2 z-20">
                 <Camera size={13} className="text-white" />

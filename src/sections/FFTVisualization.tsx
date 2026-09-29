@@ -106,8 +106,25 @@ export default function FFTVisualization() {
                     >
                       <motion.div
                         initial={{ height: 0 }}
-                        animate={isInView ? { height: `${d.amp}%` } : { height: 0 }}
-                        transition={{ duration: 0.8, delay: i * 0.015, ease: 'easeOut' }}
+                        animate={
+                          isInView
+                            ? {
+                                height: [
+                                  `${Math.max(4, d.amp * 0.7)}%`,
+                                  `${Math.min(98, d.amp * 1.15)}%`,
+                                  `${Math.max(5, d.amp * 0.85)}%`,
+                                  `${Math.min(96, d.amp * 1.05)}%`,
+                                  `${Math.max(4, d.amp * 0.7)}%`,
+                                ],
+                              }
+                            : { height: 0 }
+                        }
+                        transition={{
+                          duration: 2.2 + (i % 7) * 0.3,
+                          repeat: Infinity,
+                          ease: 'easeInOut',
+                          delay: (i % 10) * 0.08,
+                        }}
                         className={`w-[75%] rounded-t-sm transition-all duration-300 ${
                           hoveredIndex === i
                             ? 'bg-onion shadow-[0_0_16px_rgba(212,104,122,0.4)]'

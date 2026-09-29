@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
 const layers = [
@@ -42,7 +42,21 @@ const fadeUp = {
 }
 
 export default function InternalStructureExplorer() {
-  const [activeLayer, setActiveLayer] = useState<string | null>(null)
+  const [activeLayer, setActiveLayer] = useState<string>('detection')
+  const [isUserHovering, setIsUserHovering] = useState<boolean>(false)
+
+  // Auto-cycle through layers in a continuous loop unless user is hovering
+  useEffect(() => {
+    if (isUserHovering) return
+    const interval = setInterval(() => {
+      setActiveLayer((current) => {
+        const idx = layers.findIndex((l) => l.id === current)
+        const nextIdx = (idx + 1) % layers.length
+        return layers[nextIdx].id
+      })
+    }, 3200)
+    return () => clearInterval(interval)
+  }, [isUserHovering])
 
   return (
     <section className="relative w-full py-32 bg-bg-blush overflow-hidden">
@@ -83,8 +97,13 @@ export default function InternalStructureExplorer() {
                     className={`relative pl-10 py-4 rounded-2xl cursor-pointer transition-all duration-400 ${
                       active ? 'bg-onion-soft/60' : 'hover:bg-onion-soft/30'
                     }`}
-                    onMouseEnter={() => setActiveLayer(layer.id)}
-                    onMouseLeave={() => setActiveLayer(null)}
+                    onMouseEnter={() => {
+                      setActiveLayer(layer.id)
+                      setIsUserHovering(true)
+                    }}
+                    onMouseLeave={() => {
+                      setIsUserHovering(false)
+                    }}
                   >
                     {/* Timeline dot */}
                     <div className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full transition-all duration-400 ${
@@ -109,14 +128,33 @@ export default function InternalStructureExplorer() {
             </motion.div>
           </motion.div>
 
-          {/* Right: Computer Vision Video Visualizer */}
+          {/* Right: Computer Vision Video Visualizer with looping scan beam */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="relative h-[420px] flex items-center justify-center rounded-3xl overflow-hidden border border-glass-border shadow-glass"
+            animate={{
+              boxShadow: [
+                '0 8px 30px rgba(212, 104, 122, 0.12)',
+                '0 8px 45px rgba(212, 104, 122, 0.28)',
+                '0 8px 30px rgba(212, 104, 122, 0.12)',
+              ],
+            }}
+            className="relative h-[420px] flex items-center justify-center rounded-3xl overflow-hidden border border-glass-border"
           >
+            {/* Looping Frame Motion Scan Beam */}
+            <motion.div
+              animate={{
+                top: ['2%', '96%', '2%'],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+              className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-onion to-transparent shadow-[0_0_12px_#D4687A] z-20 pointer-events-none"
+            />
             <video
               autoPlay
               muted
