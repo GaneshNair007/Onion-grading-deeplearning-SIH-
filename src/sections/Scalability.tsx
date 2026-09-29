@@ -36,7 +36,7 @@ export default function Scalability() {
           <motion.div
             initial={{ opacity: 0, x: -16 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="flex items-center gap-3"
           >
             <span className="w-8 h-0.5 bg-cyan-dark" />
@@ -48,7 +48,7 @@ export default function Scalability() {
           <motion.h2
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="section-heading"
           >
             BUILT FOR A SINGLE ONION. <br />
@@ -58,7 +58,7 @@ export default function Scalability() {
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="text-lg md:text-xl text-text-sec leading-relaxed font-medium"
           >
             The software architecture starts on a zero-hardware phone prototype and scales seamlessly into high-throughput industrial conveyor sorting lines.

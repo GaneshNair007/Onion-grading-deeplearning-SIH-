@@ -11,7 +11,7 @@ export default function ProblemSection() {
           <motion.div
             initial={{ opacity: 0, x: -16 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="flex items-center gap-3 font-mono text-xs"
           >
             <span className="w-8 h-0.5 bg-sonar-cyan" />
@@ -23,7 +23,7 @@ export default function ProblemSection() {
           <motion.h2
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="section-heading"
           >
             EXTERNAL VISION ALONE <br />
@@ -33,7 +33,7 @@ export default function ProblemSection() {
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="text-base md:text-lg text-text-sec leading-relaxed font-mono"
           >
             Manual inspectors and basic RGB camera systems can only measure surface defects, tunic color, and diameter. They are completely blind to hidden neck rot, internal hollow heart, and center spongy decay.
@@ -46,7 +46,7 @@ export default function ProblemSection() {
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="hud-panel p-8 space-y-6 border-white/10"
           >
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
@@ -86,7 +86,7 @@ export default function ProblemSection() {
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             transition={{ delay: 0.15 }}
             className="hud-panel p-8 space-y-6 border-sonar-cyan/40 bg-ind-card"
           >

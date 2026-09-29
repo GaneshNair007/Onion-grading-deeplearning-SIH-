@@ -19,7 +19,7 @@ export default function GradeVisualization() {
           <motion.div
             initial={{ opacity: 0, x: -16 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="flex items-center gap-3"
           >
             <span className="w-8 h-0.5 bg-cyan-dark" />
@@ -31,7 +31,7 @@ export default function GradeVisualization() {
           <motion.h2
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="section-heading"
           >
             MEASURABLE <span className="text-cyan-dark">BATCH OUTCOMES.</span>
@@ -40,7 +40,7 @@ export default function GradeVisualization() {
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="text-lg md:text-xl text-text-sec leading-relaxed font-medium"
           >
             Every scanned tray yields immediate percentage breakdowns across Grade A, Grade URS, Rejected, and Manual Review items.
@@ -71,7 +71,7 @@ export default function GradeVisualization() {
                     <motion.div
                       initial={{ width: 0 }}
                       whileInView={{ width: `${g.pct}%` }}
-                      viewport={{ once: true }}
+                      viewport={{ once: false }}
                       transition={{ duration: 1.0, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
                       className={`h-full rounded-full ${g.bg}`}
                     />

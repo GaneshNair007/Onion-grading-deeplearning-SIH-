@@ -22,7 +22,7 @@ export default function TransparencyReport() {
           <motion.div
             initial={{ opacity: 0, x: -16 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="flex items-center gap-3"
           >
             <span className="w-8 h-0.5 bg-cyan-dark" />
@@ -34,7 +34,7 @@ export default function TransparencyReport() {
           <motion.h2
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="section-heading"
           >
             EVERY DECISION <span className="text-cyan-dark">EVERY DECISION LEAVES A TRACE.</span>
@@ -43,7 +43,7 @@ export default function TransparencyReport() {
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="text-lg md:text-xl text-text-sec leading-relaxed font-medium"
           >
             The instant digital quality report is the primary procurement deliverable — replacing subjective disputes with auditable, image-backed evidence and QR validation.

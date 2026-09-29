@@ -21,7 +21,7 @@ export default function AcousticConcept() {
           <motion.div
             initial={{ opacity: 0, x: -16 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="flex items-center gap-3 font-mono text-xs"
           >
             <span className="w-8 h-0.5 bg-sonar-cyan" />
@@ -33,7 +33,7 @@ export default function AcousticConcept() {
           <motion.h2
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="section-heading"
           >
             THE PHYSICS OF <br />
@@ -43,7 +43,7 @@ export default function AcousticConcept() {
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="text-base md:text-lg text-text-sec leading-relaxed font-mono"
           >
             Controlled acoustic excitation probes internal structural density. Intact and internally compromised onions exhibit measurably distinct sound velocity (v = √(E/ρ)) and acoustic attenuation (α).
@@ -57,7 +57,7 @@ export default function AcousticConcept() {
               key={step.id}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: false }}
               transition={{ delay: i * 0.08 }}
               className="relative"
             >
@@ -81,7 +81,7 @@ export default function AcousticConcept() {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: false }}
           className="hud-panel p-8 space-y-6 border-sonar-cyan/30 bg-ind-card"
         >
           <div className="flex items-center gap-3 border-b border-white/10 pb-4">

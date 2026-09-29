@@ -9,7 +9,7 @@ const fadeUp = {
 
 export default function AIGradingReveal() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const isInView = useInView(containerRef, { once: true, margin: '-20%' })
+  const isInView = useInView(containerRef, { once: false, margin: '-20%' })
 
   const [progress, setProgress] = useState(0)
   const [analyzing, setAnalyzing] = useState(true)
@@ -65,7 +65,7 @@ export default function AIGradingReveal() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true }}
+          viewport={{ once: false }}
           variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.12 } } }}
           className="text-center mb-20"
         >

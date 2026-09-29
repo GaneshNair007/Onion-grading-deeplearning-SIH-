@@ -56,7 +56,7 @@ export default function CoreStorySequence() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: '-80px' }}
+          viewport={{ once: false, amount: 0.2 }}
           variants={staggerContainer}
           className="text-center mb-24"
         >
@@ -77,7 +77,7 @@ export default function CoreStorySequence() {
               key={step.num}
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: true, margin: '-100px' }}
+              viewport={{ once: false, amount: 0.2 }}
               variants={staggerContainer}
               className={`grid md:grid-cols-2 gap-12 md:gap-16 items-center ${
                 idx % 2 === 1 ? 'md:direction-rtl' : ''

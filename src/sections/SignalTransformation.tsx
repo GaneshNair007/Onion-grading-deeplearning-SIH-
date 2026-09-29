@@ -133,7 +133,7 @@ export default function SignalTransformation() {
           <motion.div
             initial={{ opacity: 0, x: -16 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="flex items-center gap-3 font-mono text-xs"
           >
             <span className="w-8 h-0.5 bg-sonar-cyan" />
@@ -145,7 +145,7 @@ export default function SignalTransformation() {
           <motion.h2
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="section-heading"
           >
             TIME-DOMAIN WAVEFORM <br />
@@ -155,7 +155,7 @@ export default function SignalTransformation() {
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="text-base md:text-lg text-text-sec leading-relaxed font-mono"
           >
             The raw piezo contact impulse response recorded in the time domain is transformed via Fast Fourier Transform (FFT) into a 256-bin frequency spectrum.

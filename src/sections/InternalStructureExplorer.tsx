@@ -70,7 +70,7 @@ export default function InternalStructureExplorer() {
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true }}
+            viewport={{ once: false, amount: 0.2 }}
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.12 } } }}
             className="flex flex-col gap-10"
           >
@@ -132,7 +132,7 @@ export default function InternalStructureExplorer() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
+            viewport={{ once: false, amount: 0.2 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             animate={{
               boxShadow: [

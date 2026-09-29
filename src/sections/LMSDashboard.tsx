@@ -58,7 +58,7 @@ export default function LMSDashboard() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true }}
+          viewport={{ once: false, amount: 0.2 }}
           variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.12 } } }}
           className="mb-20"
         >
@@ -78,7 +78,7 @@ export default function LMSDashboard() {
               key={lab.title}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: false, amount: 0.15 }}
               transition={{ duration: 0.7, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
             >
               {lab.link ? (

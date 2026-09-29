@@ -27,7 +27,7 @@ const fadeUp = {
 export default function FFTVisualization() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const isInView = useInView(containerRef, { once: true, margin: '-100px' })
+  const isInView = useInView(containerRef, { once: false, margin: '-60px' })
 
   return (
     <section ref={containerRef} className="relative w-full py-32 bg-bg-base overflow-hidden">
@@ -39,7 +39,7 @@ export default function FFTVisualization() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true }}
+          viewport={{ once: false, amount: 0.2 }}
           variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.12 } } }}
           className="text-center mb-20"
         >
@@ -56,7 +56,7 @@ export default function FFTVisualization() {
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: false, amount: 0.15 }}
           transition={{ duration: 0.8 }}
           className="glass-card p-8 md:p-12"
         >
