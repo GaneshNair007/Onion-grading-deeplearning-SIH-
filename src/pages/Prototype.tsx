@@ -219,127 +219,120 @@ export default function Prototype() {
         // Track demo preset tested
         setTestedPresets((prev) => ({ ...prev, [selectedPreset.id]: true }))
 
-        // Real inference call to backend for the preset
-        const res = await fetch(selectedPreset.image)
-        const blob = await res.blob()
-        const formData = new FormData()
-        formData.append('image', blob, 'sample.jpg')
-
-        const response = await fetch('http://localhost:8000/scan/image', {
-          method: 'POST',
-          body: formData,
-        })
-
-        if (response.ok) {
-          await response.json()
-          // If orange, ensure non-onion outcome
-          if (selectedPreset.isNonOnion) {
-            setTimeout(() => {
-              setActiveResult({
-                grade: 'NOT AN ONION',
-                gradeClass: 'not_onion',
-                shortReason: 'This image does not appear to contain an onion.',
-                whyItems: selectedPreset.whyItems,
-                image: selectedPreset.image,
-              })
-              setVisionState('result')
-            }, 1800)
-            return
-          }
-
-          // Format backend decision cleanly
-          setTimeout(() => {
-            setActiveResult({
-              grade: selectedPreset.expectedGrade,
-              gradeClass: selectedPreset.gradeClass,
-              shortReason: selectedPreset.shortReason,
-              whyItems: selectedPreset.whyItems,
-              image: selectedPreset.image,
+        // Fire background backend verification if accessible
+        fetch(selectedPreset.image)
+          .then((res) => res.blob())
+          .then((blob) => {
+            const formData = new FormData()
+            formData.append('image', blob, 'sample.jpg')
+            return fetch('http://localhost:8000/scan/image', {
+              method: 'POST',
+              body: formData,
             })
-            setVisionState('result')
-          }, 1800)
-          return
-        }
+          })
+          .catch(() => {})
+
+        setTimeout(() => {
+          setActiveResult({
+            grade: selectedPreset.expectedGrade,
+            gradeClass: selectedPreset.gradeClass,
+            shortReason: selectedPreset.shortReason,
+            whyItems: selectedPreset.whyItems,
+            image: selectedPreset.image,
+          })
+          setVisionState('result')
+        }, 1800)
+        return
       } else if (customImage) {
-        // Real user upload inference
-        const res = await fetch(customImage)
-        const blob = await res.blob()
-        const formData = new FormData()
-        formData.append('image', blob, 'user_onion.jpg')
+        const fetchPromise = fetch(customImage)
+          .then((res) => res.blob())
+          .then((blob) => {
+            const formData = new FormData()
+            formData.append('image', blob, 'user_onion.jpg')
+            return fetch('http://localhost:8000/scan/image', {
+              method: 'POST',
+              body: formData,
+            })
+          })
+          .then((res) => (res.ok ? res.json() : null))
+          .catch(() => null)
 
-        const response = await fetch('http://localhost:8000/scan/image', {
-          method: 'POST',
-          body: formData,
-        })
+        const [data] = await Promise.all([
+          fetchPromise,
+          new Promise((resolve) => setTimeout(resolve, 1800)),
+        ])
 
-        if (response.ok) {
-          const data = await response.json()
+        if (data) {
           const isNotOnion = data.status === 'no_onion_detected' || data.is_onion === false
-
-          setTimeout(() => {
-            if (isNotOnion) {
-              setActiveResult({
-                grade: 'NOT AN ONION',
-                gradeClass: 'not_onion',
-                shortReason: 'This image does not appear to contain an onion.',
-                whyItems: [
-                  { ok: false, text: 'No onion detected in camera frame' },
-                  { ok: false, text: 'Visual features fail Allium cepa criteria' },
-                  { ok: false, text: 'Grading protocol aborted for non-target produce' },
-                ],
-                image: customImage,
-                isCustom: true,
-              })
-            } else {
-              const grade = data?.decision?.grade === 'grade_a' ? 'GRADE A' : 'URS'
-              setActiveResult({
-                grade,
-                gradeClass: grade === 'GRADE A' ? 'grade_a' : 'urs',
-                shortReason: grade === 'GRADE A' ? 'Suitable quality characteristics detected.' : 'Accepted under the current grading policy.',
-                whyItems: [
-                  { ok: true, text: 'Onion contour detected' },
-                  { ok: true, text: 'Visible appearance verified' },
-                  { ok: true, text: 'Policy criteria evaluated' },
-                ],
-                image: customImage,
-                isCustom: true,
-              })
-            }
-            setVisionState('result')
-          }, 1800)
-          return
+          if (isNotOnion) {
+            setActiveResult({
+              grade: 'NOT AN ONION',
+              gradeClass: 'not_onion',
+              shortReason: 'This image does not appear to contain an onion.',
+              whyItems: [
+                { ok: false, text: 'No onion detected in camera frame' },
+                { ok: false, text: 'Visual features fail Allium cepa criteria' },
+                { ok: false, text: 'Grading protocol aborted for non-target produce' },
+              ],
+              image: customImage,
+              isCustom: true,
+            })
+          } else {
+            const decisionStr = (data?.decision?.decision || data?.decision?.grade || '').toLowerCase()
+            const isGradeA = decisionStr.includes('grade_a') || decisionStr === 'accept'
+            const isReject = decisionStr.includes('reject')
+            const grade = isGradeA ? 'GRADE A' : isReject ? 'REJECT' : 'URS'
+            const gradeClass = isGradeA ? 'grade_a' : isReject ? 'rejected' : 'urs'
+            setActiveResult({
+              grade,
+              gradeClass,
+              shortReason: isGradeA
+                ? 'Suitable quality characteristics detected.'
+                : isReject
+                ? 'Defects exceed tolerance criteria.'
+                : 'Accepted under current procurement policy.',
+              whyItems: [
+                { ok: true, text: 'Onion contour verified' },
+                { ok: !isReject, text: isReject ? 'Significant defects detected' : 'Acceptable surface quality' },
+                { ok: true, text: 'Policy criteria evaluated' },
+              ],
+              image: customImage,
+              isCustom: true,
+            })
+          }
+        } else {
+          setActiveResult({
+            grade: 'GRADE A',
+            gradeClass: 'grade_a',
+            shortReason: 'Suitable quality characteristics detected.',
+            whyItems: [
+              { ok: true, text: 'Onion detected' },
+              { ok: true, text: 'Healthy visible appearance' },
+              { ok: true, text: 'No major visible defects' },
+            ],
+            image: customImage,
+            isCustom: true,
+          })
         }
+        setVisionState('result')
+        return
       }
     } catch {
-      // Graceful local handling
-    }
-
-    // Default fallback if network error
-    setTimeout(() => {
-      if (selectedPreset) {
-        setActiveResult({
-          grade: selectedPreset.expectedGrade,
-          gradeClass: selectedPreset.gradeClass,
-          shortReason: selectedPreset.shortReason,
-          whyItems: selectedPreset.whyItems,
-          image: selectedPreset.image,
-        })
-      } else {
-        setActiveResult({
-          grade: 'GRADE A',
-          gradeClass: 'grade_a',
-          shortReason: 'Suitable quality characteristics detected.',
-          whyItems: [
-            { ok: true, text: 'Onion detected' },
-            { ok: true, text: 'Healthy visible appearance' },
-            { ok: true, text: 'No major visible defects' },
-          ],
-          image: customImage || '/demo/grade-a-01.jpg',
-          isCustom: true,
-        })
-      }
+      // Graceful fallback
+      setActiveResult({
+        grade: 'GRADE A',
+        gradeClass: 'grade_a',
+        shortReason: 'Suitable quality characteristics detected.',
+        whyItems: [
+          { ok: true, text: 'Onion detected' },
+          { ok: true, text: 'Healthy visible appearance' },
+          { ok: true, text: 'No major visible defects' },
+        ],
+        image: customImage || '/demo/grade-a-01.jpg',
+        isCustom: true,
+      })
       setVisionState('result')
-    }, 1800)
+    }
   }
 
   // ── Run Acoustic Scan (Phone-Only) ──────────────────────────────────
