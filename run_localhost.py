@@ -9,15 +9,22 @@ import os
 import sys
 import time
 import subprocess
-import webbrowser
 from pathlib import Path
+
+# Fix Windows console UTF-8 encoding
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 ROOT = Path(__file__).resolve().parent
 PYTHON = str(ROOT / ".venv" / "Scripts" / "python.exe") if (ROOT / ".venv" / "Scripts" / "python.exe").exists() else sys.executable
 
 def main():
     print("=" * 76)
-    print("  🧅 ONION QUALITY GRADING & TRACEABILITY SYSTEM - LOCALHOST SERVER")
+    print("  [ONION QUALITY GRADING & TRACEABILITY SYSTEM - LOCALHOST SERVER]")
     print("  Smart India Hackathon (SIH 2026)")
     print("=" * 76)
     print("\nStarting services...")
@@ -36,25 +43,25 @@ def main():
         env=os.environ.copy()
     )
 
-    time.sleep(2)
+    time.sleep(3)
 
     print("\n" + "=" * 76)
-    print("  🚀 ALL SERVICES RUNNING SUCCESSFULLY ON LOCALHOST:")
+    print("  ALL SERVICES RUNNING SUCCESSFULLY ON LOCALHOST:")
     print("=" * 76)
-    print("  1. 🧅 OnionAI YOLOv8 AI Metrology & Grading Dashboard:")
-    print("     👉 http://localhost:5000/")
+    print("  1. OnionAI YOLOv8 AI Metrology & Grading Dashboard:")
+    print("     -> http://localhost:5000/  (or http://127.0.0.1:5000/)")
     print("     (Live YOLOv8s-seg detection, 25mm ArUco calibration, presets & PDF audits)")
     print("")
-    print("  2. 📊 ONION-Q Centre Dashboard:")
-    print("     👉 http://localhost:8000/dashboard/app/index.html")
+    print("  2. ONION-Q Centre Dashboard:")
+    print("     -> http://localhost:8000/dashboard/app/index.html")
     print("")
-    print("  3. 🔬 Multi-Modal Onion Scan Interface:")
-    print("     👉 http://localhost:8000/dashboard/app/scan.html")
+    print("  3. Multi-Modal Onion Scan Interface:")
+    print("     -> http://localhost:8000/dashboard/app/scan.html")
     print("")
-    print("  4. 🔗 Fully Merged Unified Route on Port 8000:")
-    print("     👉 http://localhost:8000/yolo/")
+    print("  4. Fully Merged Unified Route on Port 8000:")
+    print("     -> http://localhost:8000/yolo/")
     print("")
-    print("  5. 📑 API Documentation:")
+    print("  5. API Documentation:")
     print("     - FastAPI Swagger Docs: http://localhost:8000/docs")
     print("     - YOLOv8 REST API:     http://localhost:5000/api/docs")
     print("=" * 76)
