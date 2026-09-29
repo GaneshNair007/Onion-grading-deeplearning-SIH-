@@ -96,6 +96,9 @@ except Exception as _err:
 _dist_dir = PROJECT_ROOT / "dist"
 if _dist_dir.exists():
     app.mount("/site", StaticFiles(directory=str(_dist_dir), html=True), name="react-frontend")
+    _assets_dir = _dist_dir / "assets"
+    if _assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(_assets_dir)), name="react-assets")
 
 
 def store() -> Store:

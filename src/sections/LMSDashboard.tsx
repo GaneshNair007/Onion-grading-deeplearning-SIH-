@@ -11,34 +11,38 @@ const labs = [
   {
     icon: Beaker,
     title: 'Acoustic Test Bench',
-    desc: 'Live prototype interface — tap the onion near the microphone to capture acoustic impact feed and observe real-time FFT spectral analysis.',
-    tag: 'Interactive Prototype',
+    desc: 'Live multimodal inspection bench — test acoustic resonance, FFT spectral analysis, and sensor fusion in real-time.',
+    tag: 'Active Lab',
     tagClass: 'tag-pink',
     link: '/prototype',
+    external: false,
   },
   {
     icon: Waves,
     title: 'Waveform Sandbox',
-    desc: 'Experiment with FFT window sizes, peak frequency extraction, and resonance filter parameters to understand impact acoustics.',
-    tag: 'Coming Soon',
+    desc: 'Experiment with live Web Audio solenoid impact chirps, live mic capture, and 52-bin frequency spectrum analysis.',
+    tag: 'Live Audio & FFT',
     tagClass: 'tag-lavender',
-    link: null,
+    link: '/prototype',
+    external: false,
   },
   {
     icon: Cpu,
     title: 'Vision Inference Playground',
-    desc: 'Upload tray images and watch the YOLO vision model detect, segment, and classify surface defects and sizes in real-time.',
-    tag: 'Coming Soon',
+    desc: 'Deep learning instance segmentation — YOLOv8s-seg defect classification, ArUco metric sizing, and instant audit PDF generation.',
+    tag: 'YOLOv8 Lab (Port 5000)',
     tagClass: 'tag-peach',
-    link: null,
+    link: 'http://localhost:5000',
+    external: true,
   },
   {
     icon: BarChart3,
     title: 'Batch Analytics Dashboard',
-    desc: 'Process hundreds of samples and generate statistical quality distribution reports aligned with active procurement policies (Grade A / URS).',
-    tag: 'Coming Soon',
+    desc: 'ONION-Q centre procurement kiosk — multi-camera capture, batch analytics, and government grade distribution compliance.',
+    tag: 'ONION-Q Kiosk (Port 8000)',
     tagClass: 'tag-sage',
-    link: null,
+    link: 'http://localhost:8000/dashboard/app/index.html',
+    external: true,
   },
 ]
 
@@ -78,9 +82,15 @@ export default function LMSDashboard() {
               transition={{ duration: 0.7, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
             >
               {lab.link ? (
-                <Link to={lab.link} className="block">
-                  <LabCard lab={lab} interactive />
-                </Link>
+                lab.external ? (
+                  <a href={lab.link} target="_blank" rel="noopener noreferrer" className="block h-full">
+                    <LabCard lab={lab} interactive />
+                  </a>
+                ) : (
+                  <Link to={lab.link} className="block h-full">
+                    <LabCard lab={lab} interactive />
+                  </Link>
+                )
               ) : (
                 <LabCard lab={lab} />
               )}

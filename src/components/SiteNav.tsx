@@ -1,18 +1,26 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, Volume2, VolumeX } from 'lucide-react'
+import { soundSynth } from '../utils/audioSynth'
 
 const links = [
   { label: 'Home',      to: '/' },
   { label: 'About',     to: '/about' },
-  { label: 'Prototype', to: '/prototype' },
+  { label: 'Inspection Lab', to: '/prototype' },
 ]
 
 export default function SiteNav() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  const [isMuted, setIsMuted] = useState(soundSynth.getIsMuted())
   const location = useLocation()
+
+  const toggleAudio = () => {
+    const next = !isMuted
+    soundSynth.setMuted(next)
+    setIsMuted(next)
+  }
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40)
@@ -82,6 +90,19 @@ export default function SiteNav() {
 
         {/* Right Action buttons */}
         <div className="hidden md:flex items-center gap-3">
+          <button
+            onClick={toggleAudio}
+            title={isMuted ? 'Unmute Acoustic Audio Synth' : 'Mute Acoustic Audio Synth'}
+            className={`px-3 py-1.5 rounded-full text-xs font-sans font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+              isMuted
+                ? 'bg-white/50 text-text-muted hover:text-text-primary border border-glass-border'
+                : 'bg-onion-soft/90 text-onion-deep border border-onion/30 shadow-soft'
+            }`}
+          >
+            {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} className="text-onion animate-pulse" />}
+            <span>{isMuted ? 'Sound Off' : 'Acoustic Sound'}</span>
+          </button>
+
           <a
             href="http://localhost:8000/dashboard/app/scan.html"
             className="px-4 py-2 text-xs font-sans font-semibold rounded-full bg-white/60 backdrop-blur-xl border border-glass-border text-text-secondary hover:text-text-primary hover:border-onion/30 transition-all shadow-soft"
@@ -134,6 +155,33 @@ export default function SiteNav() {
                   </Link>
                 )
               })}
+
+              <div className="pt-3 border-t border-glass-border flex flex-col gap-2">
+                <button
+                  onClick={toggleAudio}
+                  className="px-4 py-2.5 rounded-xl text-xs font-sans font-medium flex items-center justify-between bg-white/60 border border-glass-border text-text-primary"
+                >
+                  <span className="flex items-center gap-2">
+                    {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} className="text-onion" />}
+                    <span>Acoustic Audio Feedback</span>
+                  </span>
+                  <span className="font-semibold text-onion">{isMuted ? 'OFF' : 'ON'}</span>
+                </button>
+                <a
+                  href="http://localhost:8000/dashboard/app/scan.html"
+                  className="px-4 py-2.5 rounded-xl text-xs font-sans font-medium flex items-center justify-between bg-white/60 border border-glass-border text-text-primary"
+                >
+                  <span>Scan Kiosk Dashboard</span>
+                  <span>↗</span>
+                </a>
+                <a
+                  href="http://localhost:5000"
+                  className="px-4 py-2.5 rounded-xl text-xs font-sans font-medium flex items-center justify-between bg-gradient-to-r from-cyan-600 to-teal-600 text-white"
+                >
+                  <span>YOLOv8 Deep Learning Lab</span>
+                  <span>↗</span>
+                </a>
+              </div>
 
             </div>
           </motion.div>

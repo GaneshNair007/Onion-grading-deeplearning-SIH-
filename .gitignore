@@ -82,6 +82,8 @@ Thumbs.db
 # ---- Frontend & Node ----
 node_modules/
 dist/
+.vite/
 .env
 .env.*
 .freebuff/
+

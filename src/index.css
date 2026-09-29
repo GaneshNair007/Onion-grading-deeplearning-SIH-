@@ -5,6 +5,19 @@
 /* ════════════════════════════════════════════════
    BASE LAYER — Global Resets & Typography
    ════════════════════════════════════════════════ */
+:root {
+  --bg: #090e17;
+  --bg-mid: #0f1724;
+  --bg-panel: #141f30;
+  --border: rgba(0, 200, 255, 0.22);
+  --border-dim: rgba(255, 255, 255, 0.08);
+  --cyan: #00c8ff;
+  --cyan-dim: rgba(0, 200, 255, 0.35);
+  --text-sec: #8ba3c7;
+  --text-dim: #526887;
+  --amber: #ffb800;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -192,6 +205,90 @@
     text-transform: uppercase;
     color: #7A6860;
     margin-top: 6px;
+  }
+
+  /* ── HUD & Tech Elements ── */
+  .tech-label {
+    font-family: 'DM Mono', monospace, ui-monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #8BA3C7;
+  }
+
+  .tech-label-cyan {
+    font-family: 'DM Mono', monospace, ui-monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #00C8FF;
+  }
+
+  .dot-live {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background-color: #00C8FF;
+    box-shadow: 0 0 10px #00C8FF;
+    animation: pulse-soft 2s infinite;
+  }
+
+  .dot-idle {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background-color: #526887;
+  }
+
+  .hud-corner {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+  }
+  .hud-corner-tl {
+    top: 0;
+    left: 0;
+    border-top: 2px solid #00C8FF;
+    border-left: 2px solid #00C8FF;
+  }
+  .hud-corner-br {
+    bottom: 0;
+    right: 0;
+    border-bottom: 2px solid #00C8FF;
+    border-right: 2px solid #00C8FF;
+  }
+
+  .mono {
+    font-family: 'DM Mono', monospace, ui-monospace;
+  }
+
+  .btn-primary-sci {
+    background: linear-gradient(135deg, rgba(0, 200, 255, 0.15) 0%, rgba(0, 160, 230, 0.3) 100%);
+    border: 1px solid rgba(0, 200, 255, 0.4);
+    color: #00C8FF;
+    padding: 10px 24px;
+    font-family: 'DM Mono', monospace, ui-monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(0, 200, 255, 0.15);
+    cursor: pointer;
+  }
+
+  .btn-primary-sci:hover {
+    background: linear-gradient(135deg, rgba(0, 200, 255, 0.3) 0%, rgba(0, 160, 230, 0.5) 100%);
+    border-color: #00C8FF;
+    box-shadow: 0 0 25px rgba(0, 200, 255, 0.35);
+    transform: translateY(-1px);
   }
 }
 
