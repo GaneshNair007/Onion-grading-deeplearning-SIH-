@@ -7,10 +7,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, List, Tuple, Dict, Any
-import threading
 import cv2
 import numpy as np
-import torch
 
 # Palette for high-end rendering (BGR for OpenCV)
 GRADE_COLORS_BGR = {
@@ -28,7 +26,6 @@ CLASS_NAME_MAP = {
 }
 
 _MODEL_CACHE: Dict[str, Any] = {}
-_MODEL_LOCK = threading.Lock()
 
 
 @dataclass
@@ -56,14 +53,11 @@ class DetectionResult:
 
 def load_model(model_path: Optional[str] = None):
     """
-    Load YOLOv8 segmentation model with priority path lookup, thread-safe caching.
+    Load YOLOv8 segmentation model with priority path lookup and caching.
     """
-    repo_root = Path(__file__).resolve().parent.parent.parent
     candidate_paths = [
         model_path,
-        str(repo_root / "model_backend" / "best.pt"),
         "model_backend/best.pt",
-        "backend/model_backend/best.pt",
         "runs/onion-grade-seg-2/weights/best.pt",
         "model_backend/last.pt",
         "weights/best.pt",
@@ -78,18 +72,17 @@ def load_model(model_path: Optional[str] = None):
     if not selected_path:
         return None, False
 
-    with _MODEL_LOCK:
-        if selected_path in _MODEL_CACHE:
-            return _MODEL_CACHE[selected_path], True
+    if selected_path in _MODEL_CACHE:
+        return _MODEL_CACHE[selected_path], True
 
-        try:
-            from ultralytics import YOLO
-            model = YOLO(selected_path)
-            _MODEL_CACHE[selected_path] = model
-            return model, True
-        except Exception as e:
-            print(f"Error loading model from {selected_path}: {e}")
-            return None, False
+    try:
+        from ultralytics import YOLO
+        model = YOLO(selected_path)
+        _MODEL_CACHE[selected_path] = model
+        return model, True
+    except Exception as e:
+        print(f"Error loading model from {selected_path}: {e}")
+        return None, False
 
 
 def detect_onions(
@@ -121,24 +114,24 @@ def detect_onions(
                 filter_summary={"error": 1},
             )
 
-    conf_clamped = min(max(float(conf_threshold), 0.05), 0.95)
-    iou_clamped = min(max(float(iou_threshold), 0.10), 0.95)
-
     # Determine execution device (CUDA if available)
     if device is None:
-        device = 0 if torch.cuda.is_available() else "cpu"
+        try:
+            import torch
+            device = 0 if torch.cuda.is_available() else "cpu"
+        except Exception:
+            device = "cpu"
 
-    # Run YOLOv8 Segmentation inside inference_mode (prevents autograd graph retention)
+    # Run YOLOv8 Segmentation
     try:
-        with torch.inference_mode():
-            yolo_results = model(
-                image,
-                conf=conf_clamped,
-                iou=iou_clamped,
-                imgsz=640,
-                device=device,
-                verbose=False,
-            )[0]
+        yolo_results = model(
+            image,
+            conf=conf_threshold,
+            iou=iou_threshold,
+            imgsz=640,
+            device=device,
+            verbose=False,
+        )[0]
     except Exception as err:
         print(f"YOLO inference error: {err}")
         return DetectionResult(

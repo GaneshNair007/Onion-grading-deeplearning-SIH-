@@ -113,19 +113,14 @@ def process_image(
             diameter_mm = (x2 - x1) / nominal_ppm
             is_calibrated = False
 
-        reason_codes: List[str] = []
-        if cal_details.get("perspective_warning"):
-            reason_codes.append("perspective_tilt_detected")
-
         # Apply Policy Rule Engine
-        final_grade, policy_reasons, defect_flags = grade_onion(
+        final_grade, reason_codes, defect_flags = grade_onion(
             diameter_mm=diameter_mm,
             visual_class=onion.visual_class,
             confidence=onion.confidence,
             calibration_ok=is_calibrated,
             policy=policy,
         )
-        combined_reasons = list(dict.fromkeys(reason_codes + policy_reasons))
 
         results.append(
             OnionGradingResult(
@@ -136,7 +131,7 @@ def process_image(
                 visual_class=onion.visual_class,
                 confidence=round(onion.confidence, 4),
                 final_grade=final_grade,
-                reason_codes=combined_reasons,
+                reason_codes=reason_codes,
                 defects=defect_flags,
                 polygon=onion.polygon,
             )
@@ -148,10 +143,9 @@ def process_image(
     # 7. Generate Evidence Reports (HTML, PDF, QR) if requested
     report_id = None
     if generate_artifacts:
-        # Convert RGB for report generator safely
-        annot_bgr = detection.annotated_image if (detection.annotated_image is not None and detection.annotated_image.size > 0) else img_bgr.copy()
+        # Convert RGB for report generator
         orig_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
-        annot_rgb = cv2.cvtColor(annot_bgr, cv2.COLOR_BGR2RGB)
+        annot_rgb = cv2.cvtColor(detection.annotated_image, cv2.COLOR_BGR2RGB)
         report_id = generate_report(
             batch_id=batch_id,
             farmer_id=farmer_id,
