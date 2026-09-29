@@ -955,56 +955,111 @@ export default function Prototype() {
                     </button>
                   </div>
 
-                  {/* Scientific Honesty Notice */}
-                  <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 text-xs text-amber-900 flex items-start gap-3">
-                    <Info className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <strong className="font-semibold text-amber-800">RESEARCH PROTOTYPE RESULT:</strong> Phone-based acoustic resonance for internal hollow core evaluation is an active research investigation. No external sensor required. Acoustic damping signature recorded cleanly.
+                  {/* Yellow Box: Phone Connection Diagram & Honest Research Status */}
+                  <div className="p-5 rounded-2xl bg-amber-500/10 border-2 border-amber-400/50 text-amber-950 space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-amber-400/30">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center font-bold text-base shadow-sm">
+                          📱
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-amber-900 uppercase tracking-wider">
+                            PHONE-TO-ONION DIRECT LINK
+                          </div>
+                          <div className="text-[11px] text-amber-800 font-medium">
+                            Zero external hardware • Uses only built-in phone speaker & microphone
+                          </div>
+                        </div>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-full bg-amber-400/30 text-amber-900 text-[10px] font-bold self-start sm:self-center tracking-wide uppercase">
+                        At A Glance
+                      </span>
+                    </div>
+
+                    {/* Visual Connection Diagram in Yellow Box */}
+                    <div className="p-4 rounded-xl bg-white/90 border border-amber-300/70 shadow-sm">
+                      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-center">
+                        
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center text-xl shadow-xs">
+                            📱
+                          </div>
+                          <div className="text-left">
+                            <div className="text-[10px] font-bold uppercase text-amber-800">1. Sound Out</div>
+                            <div className="text-xs font-bold text-text-primary">Phone Speaker</div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center text-amber-700 font-mono text-xs font-bold animate-pulse">
+                          ～～▶
+                        </div>
+
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-10 h-10 rounded-xl bg-onion-soft border border-onion/30 flex items-center justify-center text-xl shadow-xs">
+                            🧅
+                          </div>
+                          <div className="text-left">
+                            <div className="text-[10px] font-bold uppercase text-onion-deep">2. Resonance</div>
+                            <div className="text-xs font-bold text-text-primary">Onion Bulb (2cm)</div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center text-amber-700 font-mono text-xs font-bold animate-pulse">
+                          ～～▶
+                        </div>
+
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center text-xl shadow-xs">
+                            🎙
+                          </div>
+                          <div className="text-left">
+                            <div className="text-[10px] font-bold uppercase text-amber-800">3. Capture Damping</div>
+                            <div className="text-xs font-bold text-text-primary">Phone Microphone</div>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    {/* Explanation + Research Note */}
+                    <div className="text-xs text-amber-900/90 leading-relaxed flex items-start gap-2.5">
+                      <Info className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <strong>How to connect:</strong> Hold phone within 2 cm of the onion. The phone speaker emits a calibrated test frequency, and the microphone records internal resonance damping. No external sensors, cables, or microcontrollers needed.
+                        <span className="block mt-1 text-[11px] text-amber-800">
+                          <strong>RESEARCH PROTOTYPE RESULT:</strong> Phone-based acoustic resonance for internal hollow core evaluation is an active research investigation. Acoustic damping signature recorded cleanly.
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Proper Video Architecture Audit & Demonstration */}
+                  {/* Landing Page Video Container */}
                   <div className="bg-bg-soft rounded-2xl p-5 border border-glass-border">
                     <div className="mb-3">
                       <div className="text-xs font-semibold uppercase tracking-wider text-onion-deep">
-                        Acoustic Demonstration Architecture
+                        Acoustic & Resonance Demonstration Video
                       </div>
                       <h4 className="text-base font-bold text-text-primary">
-                        Phone-Only Acoustic Signal Flow
+                        Continuous Vibro-Acoustic Resonance Scanning
                       </h4>
                       <p className="text-xs text-text-secondary">
-                        The demonstration below validates the phone speaker chirp interacting with onion flesh and captured by phone microphone.
+                        Video demonstration of acoustic resonance interaction and internal structure verification.
                       </p>
                     </div>
 
-                    {/* Interactive Animated Demonstration Architecture */}
-                    <div className="relative rounded-xl overflow-hidden shadow-lg bg-black aspect-video max-w-2xl mx-auto flex flex-col items-center justify-center p-6 text-white text-center">
-                      <div className="flex items-center justify-center gap-6 mb-4">
-                        <div className="text-center">
-                          <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-2 text-2xl">
-                            📱
-                          </div>
-                          <span className="text-[11px] font-bold text-white/80">Speaker Signal</span>
-                        </div>
-
-                        <div className="flex items-center text-onion-light font-mono text-sm animate-pulse">
-                          ～～▶ 🧅 ～～▶
-                        </div>
-
-                        <div className="text-center">
-                          <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-2 text-2xl">
-                            🎙
-                          </div>
-                          <span className="text-[11px] font-bold text-white/80">Microphone</span>
-                        </div>
-                      </div>
-
-                      <div className="text-xs font-mono text-onion-light mb-1">
-                        [PHONE-ONLY ACOUSTIC PROTOTYPE ENGINE]
-                      </div>
-                      <div className="text-[11px] text-white/60 max-w-md">
-                        Controlled 240Hz → 190Hz transient acoustic pulse emitted. Resonance recorded without external sensors.
-                      </div>
+                    {/* Video Player */}
+                    <div className="relative rounded-xl overflow-hidden shadow-lg bg-black aspect-video max-w-2xl mx-auto">
+                      <video
+                        controls
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover"
+                      >
+                        <source src="/opencv.mp4" type="video/mp4" />
+                        <source src="/hero_video.mp4" type="video/mp4" />
+                      </video>
                     </div>
                   </div>
 
