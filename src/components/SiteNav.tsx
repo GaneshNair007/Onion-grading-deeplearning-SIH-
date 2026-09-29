@@ -80,6 +80,22 @@ export default function SiteNav() {
         </nav>
 
 
+        {/* Right Action buttons */}
+        <div className="hidden md:flex items-center gap-3">
+          <a
+            href="http://localhost:8000/dashboard/app/scan.html"
+            className="px-4 py-2 text-xs font-sans font-semibold rounded-full bg-white/60 backdrop-blur-xl border border-glass-border text-text-secondary hover:text-text-primary hover:border-onion/30 transition-all shadow-soft"
+          >
+            Scan Kiosk ↗
+          </a>
+          <a
+            href="http://localhost:5000"
+            className="px-4 py-2 text-xs font-sans font-semibold rounded-full bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-soft hover:opacity-90 transition-all"
+          >
+            YOLOv8 Lab ↗
+          </a>
+        </div>
+
         {/* Mobile toggle */}
         <button
           onClick={() => setOpen(!open)}

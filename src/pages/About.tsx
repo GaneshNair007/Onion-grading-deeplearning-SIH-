@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { ArrowRight, CheckCircle2, Shield, Rocket, Settings, Zap, Target, Waves, Cpu, BarChart3, Camera, Activity, MapPin, Languages, LayoutDashboard, Search, FileText } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Shield, Rocket, Settings, Zap, Target, Waves, Cpu, BarChart3, Camera, FileText } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 const fadeUp = {
