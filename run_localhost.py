@@ -1,9 +1,10 @@
 """
 Unified Localhost Runner for Onion Grading System (SIH 2026)
-Hosts both Frontend and Backend:
+Hosts Frontend and Backend:
+- React + Vite Interactive Frontend (Port 5173)
 - OnionAI YOLOv8 Deep Learning Grading & Metrology Dashboard (Port 5000)
 - ONION-Q Centre Dashboard & Multi-Modal Inspection Server (Port 8000)
-- Fully Merged Unified Route (Port 8000 /yolo/)
+- Fully Merged Unified Routes (Port 8000 /site/ and /yolo/)
 """
 import os
 import sys
@@ -43,23 +44,36 @@ def main():
         env=os.environ.copy()
     )
 
+    # 3. Start React + Vite Frontend on port 5173
+    p_vite = None
+    if (ROOT / "node_modules").exists():
+        npm_cmd = "npm.cmd" if sys.platform == "win32" else "npm"
+        p_vite = subprocess.Popen(
+            [npm_cmd, "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"],
+            cwd=str(ROOT),
+            env=os.environ.copy()
+        )
+
     time.sleep(3)
 
     print("\n" + "=" * 76)
     print("  ALL SERVICES RUNNING SUCCESSFULLY ON LOCALHOST:")
     print("=" * 76)
-    print("  1. OnionAI YOLOv8 AI Metrology & Grading Dashboard:")
+    print("  1. React + Vite Interactive Frontend (from frontend branch):")
+    print("     -> http://localhost:5173/")
+    print("     (VOSTOK Acoustic & Optical Sensing Interface, Experimental Lab)")
+    print("")
+    print("  2. OnionAI YOLOv8 AI Metrology & Grading Dashboard:")
     print("     -> http://localhost:5000/  (or http://127.0.0.1:5000/)")
     print("     (Live YOLOv8s-seg detection, 25mm ArUco calibration, presets & PDF audits)")
     print("")
-    print("  2. ONION-Q Centre Dashboard:")
+    print("  3. ONION-Q Centre Dashboard & Kiosk Scan:")
     print("     -> http://localhost:8000/dashboard/app/index.html")
-    print("")
-    print("  3. Multi-Modal Onion Scan Interface:")
     print("     -> http://localhost:8000/dashboard/app/scan.html")
     print("")
-    print("  4. Fully Merged Unified Route on Port 8000:")
-    print("     -> http://localhost:8000/yolo/")
+    print("  4. Fully Merged Unified Routes on Port 8000:")
+    print("     -> http://localhost:8000/site/  (React Production Build)")
+    print("     -> http://localhost:8000/yolo/  (YOLOv8 Metrology Dashboard)")
     print("")
     print("  5. API Documentation:")
     print("     - FastAPI Swagger Docs: http://localhost:8000/docs")
@@ -70,12 +84,18 @@ def main():
     try:
         p_yolo.wait()
         p_server.wait()
+        if p_vite:
+            p_vite.wait()
     except KeyboardInterrupt:
         print("\nStopping services...")
         p_yolo.terminate()
         p_server.terminate()
+        if p_vite:
+            p_vite.terminate()
         p_yolo.wait()
         p_server.wait()
+        if p_vite:
+            p_vite.wait()
         print("Servers stopped cleanly.")
 
 if __name__ == "__main__":

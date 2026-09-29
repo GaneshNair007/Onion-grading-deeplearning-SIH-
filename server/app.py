@@ -92,6 +92,11 @@ try:
 except Exception as _err:
     pass
 
+# Mount React + Vite production build from frontend branch
+_dist_dir = PROJECT_ROOT / "dist"
+if _dist_dir.exists():
+    app.mount("/site", StaticFiles(directory=str(_dist_dir), html=True), name="react-frontend")
+
 
 def store() -> Store:
     global _store
