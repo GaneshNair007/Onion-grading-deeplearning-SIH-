@@ -19,8 +19,8 @@ interface PresetSample {
   title: string
   subtitle: string
   image: string
-  expectedGrade: 'GRADE A' | 'URS' | 'NOT AN ONION'
-  gradeClass: 'grade_a' | 'urs' | 'not_onion'
+  expectedGrade: 'GRADE A' | 'URS' | 'NOT AN ONION' | 'REJECT'
+  gradeClass: 'grade_a' | 'urs' | 'not_onion' | 'rejected'
   shortReason: string
   whyItems: { ok: boolean; text: string }[]
   isNonOnion?: boolean
@@ -43,18 +43,18 @@ const PRESET_SAMPLES: PresetSample[] = [
     ],
   },
   {
-    id: 'grade_a_02',
+    id: 'reject_01',
     number: '02',
-    title: 'Grade A — Sample 02',
-    subtitle: 'Second Grade-A prime bulb',
-    image: '/demo/grade-a-02.jpg',
-    expectedGrade: 'GRADE A',
-    gradeClass: 'grade_a',
-    shortReason: 'Suitable quality characteristics detected.',
+    title: 'Reject — Defective',
+    subtitle: 'Surface puncture & skin hole damage',
+    image: '/demo/reject-01.jpg',
+    expectedGrade: 'REJECT',
+    gradeClass: 'rejected',
+    shortReason: 'Defects exceed tolerance criteria for procurement.',
     whyItems: [
-      { ok: true, text: 'Onion detected' },
-      { ok: true, text: 'Healthy visible appearance' },
-      { ok: true, text: 'No major visible defects' },
+      { ok: true, text: 'Onion contour detected' },
+      { ok: false, text: 'Surface puncture / hole detected' },
+      { ok: false, text: 'Exceeds Grade A and URS defect threshold' },
     ],
   },
   {
@@ -480,8 +480,8 @@ export default function Prototype() {
                       <span className={testedPresets['grade_a_01'] ? 'text-accent-success font-bold' : 'text-text-muted'}>
                         {testedPresets['grade_a_01'] ? '●' : '○'} Grade A
                       </span>
-                      <span className={testedPresets['grade_a_02'] ? 'text-accent-success font-bold' : 'text-text-muted'}>
-                        {testedPresets['grade_a_02'] ? '●' : '○'} Grade A
+                      <span className={testedPresets['reject_01'] ? 'text-rose-600 font-bold' : 'text-text-muted'}>
+                        {testedPresets['reject_01'] ? '●' : '○'} Reject
                       </span>
                       <span className={testedPresets['urs_01'] ? 'text-amber-600 font-bold' : 'text-text-muted'}>
                         {testedPresets['urs_01'] ? '●' : '○'} URS
@@ -519,6 +519,10 @@ export default function Prototype() {
                           {preset.isNonOnion ? (
                             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-700">
                               Screening
+                            </span>
+                          ) : preset.gradeClass === 'rejected' ? (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-700">
+                              REJECT
                             </span>
                           ) : (
                             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-accent-success/10 text-accent-success">
