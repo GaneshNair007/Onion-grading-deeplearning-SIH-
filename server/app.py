@@ -58,14 +58,16 @@ _CORS_ORIGINS = [
     o.strip() for o in _os.environ.get("ONIONQ_CORS_ORIGINS", "").split(",")
     if o.strip()
 ]
-if _CORS_ORIGINS:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=_CORS_ORIGINS,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+if not _CORS_ORIGINS:
+    _CORS_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5000", "http://127.0.0.1:5000", "http://localhost:8000", "http://127.0.0.1:8000"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 _store: Optional[Store] = None
 
