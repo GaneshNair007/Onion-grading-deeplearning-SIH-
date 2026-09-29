@@ -224,8 +224,8 @@ export default function Prototype() {
           .then((res) => res.blob())
           .then((blob) => {
             const formData = new FormData()
-            formData.append('image', blob, 'sample.jpg')
-            return fetch('http://localhost:8000/scan/image', {
+            formData.append('file', blob, 'sample.jpg')
+            return fetch('/predict', {
               method: 'POST',
               body: formData,
             })
@@ -244,33 +244,43 @@ export default function Prototype() {
         }, 1800)
         return
       } else if (customImage) {
-        const fetchPromise = fetch(customImage)
-          .then((res) => res.blob())
-          .then((blob) => {
-            const formData = new FormData()
-            formData.append('image', blob, 'user_onion.jpg')
-            return fetch('http://localhost:8000/scan/image', {
-              method: 'POST',
-              body: formData,
-            })
-          })
-          .then((res) => (res.ok ? res.json() : null))
-          .catch(() => null)
+        // ── Convert data URL → Blob directly (fetch() on data: URI is unreliable) ──
+        const dataUrlToBlob = (dataUrl: string): Blob => {
+          const [header, base64] = dataUrl.split(',')
+          const mime = header.match(/:(.*?);/)?.[1] ?? 'image/jpeg'
+          const bytes = atob(base64)
+          const arr = new Uint8Array(bytes.length)
+          for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i)
+          return new Blob([arr], { type: mime })
+        }
 
-        const [data] = await Promise.all([
-          fetchPromise,
-          new Promise((resolve) => setTimeout(resolve, 1800)),
-        ])
+        const blob = dataUrlToBlob(customImage)
+        const formData = new FormData()
+        // `/predict` is served by the YOLO grading backend.  The lighter
+        // `/scan/image` service has no deployed detector artifact, so it
+        // cannot make a reliable onion/non-onion decision for web uploads.
+        formData.append('file', blob, 'user_onion.jpg')
+
+        let data: any = null
+        try {
+          const [res] = await Promise.all([
+            fetch('/predict', { method: 'POST', body: formData }),
+            new Promise((resolve) => setTimeout(resolve, 1800)),
+          ])
+          if (res.ok) data = await res.json()
+        } catch {
+          data = null
+        }
 
         if (data) {
-          const isNotOnion = data.status === 'no_onion_detected' || data.is_onion === false
+          const isNotOnion = data.status === 'no_onions_detected' || data.is_onion_frame === false
           if (isNotOnion) {
             setActiveResult({
               grade: 'NOT AN ONION',
               gradeClass: 'not_onion',
               shortReason: 'This image does not appear to contain an onion.',
               whyItems: [
-                { ok: false, text: 'No onion detected in camera frame' },
+                { ok: false, text: 'No onion detected in the uploaded image' },
                 { ok: false, text: 'Visual features fail Allium cepa criteria' },
                 { ok: false, text: 'Grading protocol aborted for non-target produce' },
               ],
@@ -278,9 +288,9 @@ export default function Prototype() {
               isCustom: true,
             })
           } else {
-            const decisionStr = (data?.decision?.decision || data?.decision?.grade || '').toLowerCase()
-            const isGradeA = decisionStr.includes('grade_a') || decisionStr === 'accept'
-            const isReject = decisionStr.includes('reject')
+            const gradeValue = String(data?.predictions?.[0]?.final_grade || '').toUpperCase()
+            const isGradeA = gradeValue === 'GRADE_A' || gradeValue === 'GRADE A' || gradeValue === 'ACCEPT'
+            const isReject = gradeValue.includes('REJECT')
             const grade = isGradeA ? 'GRADE A' : isReject ? 'REJECT' : 'URS'
             const gradeClass = isGradeA ? 'grade_a' : isReject ? 'rejected' : 'urs'
             setActiveResult({
@@ -292,23 +302,23 @@ export default function Prototype() {
                 ? 'Defects exceed tolerance criteria.'
                 : 'Accepted under current procurement policy.',
               whyItems: [
-                { ok: true, text: 'Onion contour verified' },
+                { ok: true, text: `${data.count || 1} onion${data.count === 1 ? '' : 's'} detected` },
                 { ok: !isReject, text: isReject ? 'Significant defects detected' : 'Acceptable surface quality' },
-                { ok: true, text: 'Policy criteria evaluated' },
+                { ok: true, text: 'YOLO grading policy evaluated' },
               ],
               image: customImage,
               isCustom: true,
             })
           }
         } else {
+          // Backend unreachable — show honest error, NOT a fake grade
           setActiveResult({
-            grade: 'GRADE A',
-            gradeClass: 'grade_a',
-            shortReason: 'Suitable quality characteristics detected.',
+            grade: 'ERROR',
+            gradeClass: 'not_onion',
+            shortReason: 'Could not reach the grading backend. Make sure the server is running.',
             whyItems: [
-              { ok: true, text: 'Onion detected' },
-              { ok: true, text: 'Healthy visible appearance' },
-              { ok: true, text: 'No major visible defects' },
+              { ok: false, text: 'YOLO grading service did not respond' },
+              { ok: false, text: 'No grade could be assigned without backend analysis' },
             ],
             image: customImage,
             isCustom: true,
@@ -318,15 +328,14 @@ export default function Prototype() {
         return
       }
     } catch {
-      // Graceful fallback
+      // Graceful fallback for truly unexpected errors — still no fake grade
       setActiveResult({
-        grade: 'GRADE A',
-        gradeClass: 'grade_a',
-        shortReason: 'Suitable quality characteristics detected.',
+        grade: 'ERROR',
+        gradeClass: 'not_onion',
+        shortReason: 'An unexpected error occurred during analysis.',
         whyItems: [
-          { ok: true, text: 'Onion detected' },
-          { ok: true, text: 'Healthy visible appearance' },
-          { ok: true, text: 'No major visible defects' },
+          { ok: false, text: 'Unexpected frontend error during analysis' },
+          { ok: false, text: 'Please try again or contact support' },
         ],
         image: customImage || '/demo/grade-a-01.jpg',
         isCustom: true,
@@ -334,7 +343,6 @@ export default function Prototype() {
       setVisionState('result')
     }
   }
-
   // ── Run Acoustic Scan (Phone-Only) ──────────────────────────────────
   const startAcousticScan = async () => {
     setAcousticState('preparing')
@@ -547,7 +555,7 @@ export default function Prototype() {
                   ))}
                 </div>
 
-                {/* 5th Option: CUSTOM UPLOAD (Spans across or clearly prominent) */}
+                {/* Custom Upload — Live Pipeline */}
                 <div className="mt-4 pt-4 border-t border-glass-border">
                   <div
                     onClick={() => fileInputRef.current?.click()}
@@ -575,7 +583,7 @@ export default function Prototype() {
                           </span>
                         </div>
                         <p className="text-xs text-text-secondary mt-0.5">
-                          Upload your own onion or produce photo from device gallery, or snap with camera.
+                          Upload any image — the backend AI will classify it correctly.
                         </p>
                       </div>
                     </div>
