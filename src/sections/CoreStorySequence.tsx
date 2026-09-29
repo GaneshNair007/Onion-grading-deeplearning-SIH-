@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion'
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 50 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
+  hidden: { opacity: 0, y: 40, transition: { duration: 0.35, ease: 'easeOut' } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } },
 }
 
 const staggerContainer = {
@@ -11,7 +11,6 @@ const staggerContainer = {
 }
 
 const steps = [
-
   {
     num: '01',
     title: 'The Solution',
@@ -56,7 +55,7 @@ export default function CoreStorySequence() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: false, amount: 0.2 }}
+          viewport={{ once: false, amount: 0.15 }}
           variants={staggerContainer}
           className="text-center mb-24"
         >
@@ -77,7 +76,7 @@ export default function CoreStorySequence() {
               key={step.num}
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: false, amount: 0.2 }}
+              viewport={{ once: false, amount: 0.15 }}
               variants={staggerContainer}
               className={`grid md:grid-cols-2 gap-12 md:gap-16 items-center ${
                 idx % 2 === 1 ? 'md:direction-rtl' : ''
@@ -111,6 +110,61 @@ export default function CoreStorySequence() {
                     />
                     {/* Image overlay gradient */}
                     <div className="absolute inset-0 bg-gradient-to-t from-bg-base/20 to-transparent pointer-events-none" />
+
+                    {/* Step 01: Looping acoustic chirp sonar pulse animation */}
+                    {step.num === '01' && (
+                      <div className="absolute top-[28%] left-[28%] pointer-events-none">
+                        <motion.div
+                          animate={{ scale: [1, 2.8, 3.8], opacity: [0.8, 0.3, 0] }}
+                          transition={{ duration: 2.4, repeat: Infinity, ease: 'easeOut' }}
+                          className="absolute -inset-4 rounded-full border-2 border-onion/60"
+                        />
+                        <motion.div
+                          animate={{ scale: [1, 2.2, 3.2], opacity: [0.9, 0.4, 0] }}
+                          transition={{ duration: 2.4, repeat: Infinity, ease: 'easeOut', delay: 0.8 }}
+                          className="absolute -inset-4 rounded-full border border-onion-light/80"
+                        />
+                        <motion.div
+                          animate={{ scale: [0.9, 1.25, 0.9], opacity: [0.8, 1, 0.8] }}
+                          transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+                          className="w-4 h-4 rounded-full bg-onion shadow-[0_0_14px_rgba(184,80,66,0.9)]"
+                        />
+                      </div>
+                    )}
+
+                    {/* Step 02: Looping FFT live frequency equalizer */}
+                    {step.num === '02' && (
+                      <div className="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md rounded-2xl p-3 border border-white/20 flex items-center justify-between pointer-events-none">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                          <span className="text-[11px] font-mono font-medium text-white/90">FFT Resonance 2.4 kHz</span>
+                        </div>
+                        <div className="flex items-end gap-1 h-5">
+                          {[40, 75, 100, 60, 85, 30, 95, 50].map((h, i) => (
+                            <motion.div
+                              key={i}
+                              animate={{ height: [`${h * 0.3}%`, `${h}%`, `${h * 0.4}%`] }}
+                              transition={{ duration: 1.2 + (i % 3) * 0.3, repeat: Infinity, ease: 'easeInOut' }}
+                              className="w-1 bg-gradient-to-t from-peach to-amber-300 rounded-full"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Step 03: Looping Audit Verified certification stamp */}
+                    {step.num === '03' && (
+                      <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-md rounded-2xl px-4 py-2 border border-emerald-500/30 shadow-glass flex items-center gap-2.5 pointer-events-none">
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+                          className="w-3.5 h-3.5 rounded-full border-2 border-emerald-600 border-t-transparent"
+                        />
+                        <span className="text-[11px] font-mono font-semibold text-emerald-800 tracking-wide">
+                          GRADE A • AUDIT VERIFIED
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -129,7 +183,12 @@ export default function CoreStorySequence() {
                 variants={fadeUp}
                 className={`flex flex-col ${idx % 2 === 1 ? 'md:order-1' : ''}`}
               >
-                <div className={`tag ${step.tagClass} w-fit mb-6`}>
+                <div className={`tag ${step.tagClass} w-fit mb-6 flex items-center gap-2`}>
+                  <motion.span
+                    animate={{ opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                    className="w-1.5 h-1.5 rounded-full bg-current"
+                  />
                   {step.tag}
                 </div>
 
@@ -141,10 +200,14 @@ export default function CoreStorySequence() {
                   {step.desc}
                 </p>
 
-                {/* Decorative line */}
+                {/* Decorative line with looping pulse */}
                 <div className="mt-8 flex items-center gap-3">
                   <div className="h-px flex-1 bg-gradient-to-r from-onion/20 to-transparent" />
-                  <div className="w-2 h-2 rounded-full bg-onion-light" />
+                  <motion.div
+                    animate={{ scale: [1, 1.6, 1], opacity: [0.6, 1, 0.6] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                    className="w-2 h-2 rounded-full bg-onion-light"
+                  />
                 </div>
               </motion.div>
             </motion.div>
