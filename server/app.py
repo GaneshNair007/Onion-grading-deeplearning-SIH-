@@ -122,7 +122,7 @@ def _registry_summary() -> Dict[str, Any]:
 # --------------------------------------------------------------------- meta
 @app.get("/")
 def root():
-    return RedirectResponse(url="/dashboard/app/scan.html")
+    return RedirectResponse(url="/dashboard/app/index.html")
 
 
 @app.get("/health")
