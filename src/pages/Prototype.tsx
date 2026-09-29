@@ -225,7 +225,8 @@ export default function Prototype() {
           .then((blob) => {
             const formData = new FormData()
             formData.append('image', blob, 'sample.jpg')
-            return fetch('http://localhost:8000/scan/image', {
+            formData.append('conf_threshold', '0.65')
+            return fetch('http://localhost:8000/yolo/predict', {
               method: 'POST',
               body: formData,
             })
@@ -249,7 +250,8 @@ export default function Prototype() {
           .then((blob) => {
             const formData = new FormData()
             formData.append('image', blob, 'user_onion.jpg')
-            return fetch('http://localhost:8000/scan/image', {
+            formData.append('conf_threshold', '0.65')
+            return fetch('http://localhost:8000/yolo/predict', {
               method: 'POST',
               body: formData,
             })
@@ -263,7 +265,7 @@ export default function Prototype() {
         ])
 
         if (data) {
-          const isNotOnion = data.status === 'no_onion_detected' || data.is_onion === false
+          const isNotOnion = data.status === 'no_onions_detected' || data.is_onion_frame === false || data.status === 'no_onion_detected' || data.is_onion === false
           if (isNotOnion) {
             setActiveResult({
               grade: 'NOT AN ONION',
@@ -278,7 +280,9 @@ export default function Prototype() {
               isCustom: true,
             })
           } else {
-            const decisionStr = (data?.decision?.decision || data?.decision?.grade || '').toLowerCase()
+            const firstPred = (data.predictions && data.predictions[0]) || {}
+            const oldDecision = data?.decision?.decision || data?.decision?.grade || ''
+            const decisionStr = (firstPred.final_grade || firstPred.visual_class || oldDecision || '').toLowerCase()
             const isGradeA = decisionStr.includes('grade_a') || decisionStr === 'accept'
             const isReject = decisionStr.includes('reject')
             const grade = isGradeA ? 'GRADE A' : isReject ? 'REJECT' : 'URS'
