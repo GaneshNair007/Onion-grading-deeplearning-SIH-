@@ -964,7 +964,7 @@ export default function Prototype() {
                         </div>
                         <div>
                           <div className="text-xs font-bold text-amber-900 uppercase tracking-wider">
-                            PHONE-TO-ONION DIRECT LINK
+                            PHONE-TO-ONION DIRECT ACOUSTIC LINK
                           </div>
                           <div className="text-[11px] text-amber-800 font-medium">
                             Zero external hardware • Uses only built-in phone speaker & microphone
@@ -977,47 +977,38 @@ export default function Prototype() {
                     </div>
 
                     {/* Visual Connection Diagram in Yellow Box */}
-                    <div className="p-4 rounded-xl bg-white/90 border border-amber-300/70 shadow-sm">
-                      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-center">
+                    <div className="p-4 rounded-xl bg-black/90 text-white border border-amber-400/40 shadow-md">
+                      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-center py-2">
                         
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center text-xl shadow-xs">
+                        <div className="flex flex-col items-center">
+                          <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-2xl mb-1.5 shadow-inner">
                             📱
                           </div>
-                          <div className="text-left">
-                            <div className="text-[10px] font-bold uppercase text-amber-800">1. Sound Out</div>
-                            <div className="text-xs font-bold text-text-primary">Phone Speaker</div>
-                          </div>
+                          <span className="text-[11px] font-bold text-amber-300">1. Speaker Signal</span>
+                          <span className="text-[10px] text-white/60">Phone Speaker Out</span>
                         </div>
 
-                        <div className="flex items-center text-amber-700 font-mono text-xs font-bold animate-pulse">
-                          ～～▶
+                        <div className="flex items-center text-onion-light font-mono text-sm animate-pulse tracking-widest">
+                          ～～▶ 🧅 ～～▶
                         </div>
 
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-10 h-10 rounded-xl bg-onion-soft border border-onion/30 flex items-center justify-center text-xl shadow-xs">
-                            🧅
-                          </div>
-                          <div className="text-left">
-                            <div className="text-[10px] font-bold uppercase text-onion-deep">2. Resonance</div>
-                            <div className="text-xs font-bold text-text-primary">Onion Bulb (2cm)</div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center text-amber-700 font-mono text-xs font-bold animate-pulse">
-                          ～～▶
-                        </div>
-
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center text-xl shadow-xs">
+                        <div className="flex flex-col items-center">
+                          <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-2xl mb-1.5 shadow-inner">
                             🎙
                           </div>
-                          <div className="text-left">
-                            <div className="text-[10px] font-bold uppercase text-amber-800">3. Capture Damping</div>
-                            <div className="text-xs font-bold text-text-primary">Phone Microphone</div>
-                          </div>
+                          <span className="text-[11px] font-bold text-amber-300">2. Response Capture</span>
+                          <span className="text-[10px] text-white/60">Phone Microphone In</span>
                         </div>
 
+                      </div>
+
+                      <div className="mt-3 pt-3 border-t border-white/10 text-center">
+                        <div className="text-[11px] font-mono text-amber-300/90 font-semibold mb-0.5">
+                          [PHONE-ONLY ACOUSTIC PROTOTYPE ENGINE]
+                        </div>
+                        <div className="text-[10px] text-white/70">
+                          Controlled 240Hz → 190Hz transient acoustic pulse emitted. Internal resonance damping recorded without external sensors.
+                        </div>
                       </div>
                     </div>
 
@@ -1025,7 +1016,7 @@ export default function Prototype() {
                     <div className="text-xs text-amber-900/90 leading-relaxed flex items-start gap-2.5">
                       <Info className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
                       <div>
-                        <strong>How to connect:</strong> Hold phone within 2 cm of the onion. The phone speaker emits a calibrated test frequency, and the microphone records internal resonance damping. No external sensors, cables, or microcontrollers needed.
+                        <strong>How to connect:</strong> Hold your phone within 2 cm of the onion. The phone speaker emits a calibrated test frequency, and the microphone records internal resonance damping. No external sensors, cables, or microcontrollers needed.
                         <span className="block mt-1 text-[11px] text-amber-800">
                           <strong>RESEARCH PROTOTYPE RESULT:</strong> Phone-based acoustic resonance for internal hollow core evaluation is an active research investigation. Acoustic damping signature recorded cleanly.
                         </span>
@@ -1033,21 +1024,21 @@ export default function Prototype() {
                     </div>
                   </div>
 
-                  {/* Landing Page Video Container */}
+                  {/* Landing Page Video Container (Apple Phone Acoustic Video) */}
                   <div className="bg-bg-soft rounded-2xl p-5 border border-glass-border">
                     <div className="mb-3">
                       <div className="text-xs font-semibold uppercase tracking-wider text-onion-deep">
                         Acoustic & Resonance Demonstration Video
                       </div>
                       <h4 className="text-base font-bold text-text-primary">
-                        Continuous Vibro-Acoustic Resonance Scanning
+                        Phone-Based Acoustic Resonance Scanning
                       </h4>
                       <p className="text-xs text-text-secondary">
-                        Video demonstration of acoustic resonance interaction and internal structure verification.
+                        Landing page demonstration of acoustic resonance interaction and internal structure verification using the smartphone.
                       </p>
                     </div>
 
-                    {/* Video Player */}
+                    {/* Video Player playing bg-video.mp4 / hero_video.mp4 */}
                     <div className="relative rounded-xl overflow-hidden shadow-lg bg-black aspect-video max-w-2xl mx-auto">
                       <video
                         controls
@@ -1057,7 +1048,7 @@ export default function Prototype() {
                         playsInline
                         className="w-full h-full object-cover"
                       >
-                        <source src="/opencv.mp4" type="video/mp4" />
+                        <source src="/bg-video.mp4" type="video/mp4" />
                         <source src="/hero_video.mp4" type="video/mp4" />
                       </video>
                     </div>
