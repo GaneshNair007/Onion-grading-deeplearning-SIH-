@@ -84,6 +84,14 @@ _report_files_dir.mkdir(parents=True, exist_ok=True)
 app.mount("/artifacts/evidence", StaticFiles(directory=str(_report_files_dir)),
           name="report-evidence")
 
+# Mount YOLOv8 Deep Learning & Metrology Backend + Frontend from cloned backend
+try:
+    from starlette.middleware.wsgi import WSGIMiddleware
+    from backend.model_backend.api import app as yolo_flask_app
+    app.mount("/yolo", WSGIMiddleware(yolo_flask_app), name="yolo-grading")
+except Exception as _err:
+    pass
+
 
 def store() -> Store:
     global _store

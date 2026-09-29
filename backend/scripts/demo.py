@@ -22,25 +22,30 @@ def run_demo(mode: str = "real", custom_image: str = None, count: int = 3):
     print("  Deep Learning (YOLOv8s-Seg) + ArUco Calibration + Policy Rule Engine")
     print("=" * 72)
 
+    repo_root = Path(__file__).resolve().parent.parent
     target_images = []
     if custom_image:
         target_images.append(Path(custom_image))
     elif mode == "tray":
-        tray_path = Path("data/synthetic/composite_tray.jpg")
+        tray_path = repo_root / "data" / "synthetic" / "composite_tray.jpg"
+        if not tray_path.exists():
+            tray_path = Path("data/synthetic/composite_tray.jpg")
         if not tray_path.exists():
             print("\nGenerating calibrated composite tray with ArUco reference...")
-            # Recreate composite tray
             import cv2
-            tray = cv2.imread("data/synthetic/test_tray.png")
-            target_images.append(Path("data/synthetic/composite_tray.jpg"))
+            tray = cv2.imread(str(repo_root / "data" / "synthetic" / "test_tray.png"))
+            target_images.append(tray_path)
         else:
             target_images.append(tray_path)
     else:
-        valid_dir = Path("data/real/images/valid")
+        valid_dir = repo_root / "data" / "real" / "images" / "valid"
+        if not valid_dir.exists():
+            valid_dir = Path("data/real/images/valid")
         all_val = sorted(list(valid_dir.glob("*.jpg")))
         if not all_val:
             print("No validation images found in data/real/images/valid. Fallback to tray.")
-            target_images.append(Path("data/synthetic/composite_tray.jpg"))
+            tray_fallback = repo_root / "data" / "synthetic" / "composite_tray.jpg"
+            target_images.append(tray_fallback)
         else:
             # Pick a diverse set of samples
             random.seed(42)

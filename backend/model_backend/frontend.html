@@ -593,6 +593,8 @@
         <span id="tele-device">RTX 5050 Active</span>
       </div>
       <button class="btn-secondary" onclick="openPolicyModal()">⚙ Policy Rules</button>
+      <a href="/dashboard/app/index.html" id="link-dashboard" class="btn-secondary" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; color:var(--text);">📊 Centre Dashboard</a>
+      <a href="/dashboard/app/scan.html" id="link-scan" class="btn-secondary" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; color:var(--text);">🔬 Multi-Modal Scan</a>
     </div>
   </header>
 
@@ -826,6 +828,10 @@
   </div>
 
   <script>
+    const isYoloMounted = window.location.pathname.startsWith('/yolo');
+    const API_BASE = isYoloMounted ? '/yolo' : '';
+    const DASHBOARD_BASE = isYoloMounted ? '' : 'http://localhost:8000';
+
     let currentImageFile = null;
     let currentImageBase64 = null;
     let currentAnnotatedBase64 = null;
@@ -836,7 +842,12 @@
 
     // Load Telemetry & Policy on Init
     window.addEventListener('DOMContentLoaded', () => {
-      fetch('/health')
+      const linkDash = document.getElementById('link-dashboard');
+      const linkScan = document.getElementById('link-scan');
+      if (linkDash) linkDash.href = DASHBOARD_BASE + '/dashboard/app/index.html';
+      if (linkScan) linkScan.href = DASHBOARD_BASE + '/dashboard/app/scan.html';
+
+      fetch(API_BASE + '/health')
         .then(r => r.json())
         .then(data => {
           document.getElementById('tele-device').innerText = data.device;
@@ -883,13 +894,14 @@
     // 1-Click Sample Preset Loader
     async function loadSample(sampleId) {
       try {
-        const resp = await fetch('/sample-images');
+        const resp = await fetch(API_BASE + '/sample-images');
         const list = await resp.json();
         const item = list.find(s => s.id === sampleId);
         if (!item) return;
 
         // Fetch image as blob
-        const imgResp = await fetch(item.url);
+        const targetUrl = item.url.startsWith('http') ? item.url : (API_BASE + (item.url.startsWith('/') ? item.url : '/' + item.url));
+        const imgResp = await fetch(targetUrl);
         const blob = await imgResp.blob();
         currentImageFile = new File([blob], item.filename, { type: 'image/jpeg' });
         
@@ -930,7 +942,7 @@
       formData.append('conf_threshold', (parseInt(document.getElementById('conf-slider').value) / 100).toFixed(2));
 
       try {
-        const response = await fetch('/predict', {
+        const response = await fetch(API_BASE + '/predict', {
           method: 'POST',
           body: formData,
         });
@@ -1000,8 +1012,8 @@
       // Audit Reports Card
       if (data.report_id) {
         document.getElementById('export-card').style.display = 'block';
-        document.getElementById('btn-view-html').href = `/reports/${data.report_id}/html`;
-        document.getElementById('btn-download-pdf').href = `/reports/${data.report_id}/pdf`;
+        document.getElementById('btn-view-html').href = `${API_BASE}/reports/${data.report_id}/html`;
+        document.getElementById('btn-download-pdf').href = `${API_BASE}/reports/${data.report_id}/pdf`;
       }
 
       // Table rows
@@ -1090,7 +1102,7 @@
     // Policy Modal Controls
     async function openPolicyModal() {
       try {
-        const resp = await fetch('/policy');
+        const resp = await fetch(API_BASE + '/policy');
         const p = await resp.json();
         document.getElementById('pol-a-min').value = p.grade_a.diameter_min_mm;
         document.getElementById('pol-a-max').value = p.grade_a.diameter_max_mm;
@@ -1128,7 +1140,7 @@
       };
 
       try {
-        const resp = await fetch('/policy', {
+        const resp = await fetch(API_BASE + '/policy', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),

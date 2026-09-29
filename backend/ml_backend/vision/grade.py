@@ -6,7 +6,7 @@ into government & mandi procurement classifications.
 from __future__ import annotations
 import json
 from pathlib import Path
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from typing import Literal, Optional, List, Dict, Any, Tuple
 from collections import Counter
 import numpy as np
@@ -57,6 +57,20 @@ class GradingPolicy(BaseModel):
             "max_defects": {"damaged": True, "rotten": False, "sprouted": True},
         }
     )
+
+    @model_validator(mode="after")
+    def validate_bounds(self) -> "GradingPolicy":
+        if not (0.01 <= self.min_confidence_threshold <= 0.99):
+            raise ValueError(f"min_confidence_threshold must be between 0.01 and 0.99, got {self.min_confidence_threshold}")
+        min_a = float(self.grade_a.get("diameter_min_mm", 45.0))
+        max_a = float(self.grade_a.get("diameter_max_mm", 65.0))
+        if min_a <= 0 or max_a <= 0 or min_a >= max_a:
+            raise ValueError(f"grade_a diameters must be positive and min < max: got min={min_a}, max={max_a}")
+        min_u = float(self.grade_urs.get("diameter_min_mm", 35.0))
+        max_u = float(self.grade_urs.get("diameter_max_mm", 70.0))
+        if min_u <= 0 or max_u <= 0 or min_u >= max_u:
+            raise ValueError(f"grade_urs diameters must be positive and min < max: got min={min_u}, max={max_u}")
+        return self
 
     @classmethod
     def from_json(cls, path: str | Path) -> "GradingPolicy":
