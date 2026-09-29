@@ -296,12 +296,6 @@
    UTILITIES
    ════════════════════════════════════════════════ */
 @layer utilities {
-  .text-gradient-onion {
-    background: linear-gradient(135deg, #D4687A 0%, #B8475D 50%, #7B93BD 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
 
   .shimmer-bg {
     background: linear-gradient(

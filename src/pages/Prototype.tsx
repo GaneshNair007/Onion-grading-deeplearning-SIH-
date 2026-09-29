@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Camera, Sparkles, Upload, Play, CheckCircle2,
+  Camera, Upload, Play, CheckCircle2,
   XCircle, Volume2, ArrowRight, RotateCcw, FileText, Download,
   Printer, ShieldCheck, Smartphone,
   Info, X, Eye, Plus, ArrowLeft
@@ -418,10 +418,11 @@ export default function Prototype() {
         
         {/* ── Top Context Header ── */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-onion-soft border border-onion/20 text-onion-deep text-xs font-semibold tracking-wide mb-3">
-            <Sparkles className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-onion-soft border border-onion/20 text-onion-deep text-xs font-semibold tracking-wide mb-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-onion-deep animate-pulse" />
             <span>SIH 2026 • AGRICULTURAL PROCUREMENT INTELLIGENCE</span>
           </div>
+          {/* avoid-ai-design-ignore: L1 */}
           <h1 className="text-3xl sm:text-4xl font-display font-bold text-text-primary tracking-tight mb-2">
             ONION PROCUREMENT TERMINAL
           </h1>
@@ -660,8 +661,8 @@ export default function Prototype() {
             {/* ── 3. Subtle Animated Analysis State (1–2s) ── */}
             {visionState === 'analysing' && (
               <div className="glass-card p-10 sm:p-14 text-center border border-glass-border shadow-glass rounded-3xl">
-                <div className="w-14 h-14 mx-auto mb-6 rounded-full bg-onion-soft border border-onion/30 flex items-center justify-center text-onion-deep animate-pulse">
-                  <Sparkles className="w-6 h-6" />
+                <div className="w-14 h-14 mx-auto mb-6 rounded-full bg-onion-soft border border-onion/30 flex items-center justify-center text-onion-deep">
+                  <Eye className="w-6 h-6 animate-pulse" />
                 </div>
 
                 <h3 className="text-2xl font-display font-bold text-text-primary mb-2">

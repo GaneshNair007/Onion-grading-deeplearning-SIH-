@@ -152,7 +152,7 @@ export default function HeroSonar() {
           >
             <h1 className="hero-heading">
               ACOUSTIC <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-sonar-cyan via-teal-300 to-amber-400">
+              <span className="text-sonar-cyan font-bold">
                 STRUCTURAL RESONANCE
               </span> <br />
               SENSING.

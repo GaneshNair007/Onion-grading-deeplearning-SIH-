@@ -61,7 +61,7 @@ export default function Scalability() {
             viewport={{ once: false }}
             className="text-lg md:text-xl text-text-sec leading-relaxed font-medium"
           >
-            The software architecture starts on a zero-hardware phone prototype and scales seamlessly into high-throughput industrial conveyor sorting lines.
+            The software architecture starts on a zero-hardware phone prototype and deploys directly into high-throughput industrial conveyor sorting lines.
           </motion.p>
         </div>
 

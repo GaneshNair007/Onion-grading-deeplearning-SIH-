@@ -50,7 +50,7 @@ export default function SiteNav() {
           className="flex items-center gap-3 select-none group"
         >
           <div className="flex flex-col leading-none">
-            <span className="font-display text-xl font-bold bg-gradient-to-br from-onion-deep to-onion bg-clip-text text-transparent tracking-[0.15em] uppercase transition-all duration-500 group-hover:opacity-80">
+            <span className="font-display text-xl font-bold text-onion-deep tracking-[0.15em] uppercase transition-all duration-300 group-hover:opacity-80">
               VOSTOK
             </span>
             <span className="text-[9px] text-text-muted font-sans font-medium max-w-[150px] leading-tight mt-1 hidden lg:block opacity-70">
