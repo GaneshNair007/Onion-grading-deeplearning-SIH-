@@ -54,17 +54,17 @@ app = FastAPI(
 # NOTE: allow_credentials=True requires explicit origins (never "*").
 import os as _os
 
-_CORS_ORIGINS = [
-    o.strip() for o in _os.environ.get("ONIONQ_CORS_ORIGINS", "").split(",")
-    if o.strip()
-]
-if not _CORS_ORIGINS:
-    _CORS_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5000", "http://127.0.0.1:5000", "http://localhost:8000", "http://127.0.0.1:8000"]
+_CORS_ORIGINS_ENV = _os.environ.get("ONIONQ_CORS_ORIGINS", "").strip()
+_CORS_ORIGINS = [o.strip() for o in _CORS_ORIGINS_ENV.split(",") if o.strip()]
+
+# In demo/hackathon mode with no explicit origins set, allow all origins so
+# judges can open the hosted URL without CORS errors.
+_ALLOW_ALL = not bool(_CORS_ORIGINS)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_CORS_ORIGINS,
-    allow_credentials=True,
+    allow_origins=["*"] if _ALLOW_ALL else _CORS_ORIGINS,
+    allow_credentials=False if _ALLOW_ALL else True,
     allow_methods=["*"],
     allow_headers=["*"],
 )

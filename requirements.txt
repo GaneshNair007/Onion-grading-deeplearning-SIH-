@@ -32,7 +32,12 @@ uvicorn==0.52.4
 pydantic==2.13.3
 python-multipart==0.0.32   # multipart uploads for camera/audio endpoints
 requests==2.34.2           # Supabase PostgREST sync (src/integrations/)
+a2wsgi==1.10.8             # bridges Flask (WSGI) into FastAPI (ASGI) at /yolo/
 # No ORM: server/store.py uses the standard-library sqlite3 module.
+
+# --- Flask YOLOv8 backend (backend/model_backend/) ---
+flask==3.1.1
+flask-cors==5.0.1
 
 # --- reporting ---
 qrcode==8.0              # QR generation for tamper-evident reports

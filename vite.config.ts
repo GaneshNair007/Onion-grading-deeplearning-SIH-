@@ -3,8 +3,11 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from 'tailwindcss'
 import autoprefixer from 'autoprefixer'
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [react()],
+  // In production the React build is served by FastAPI at /site/.
+  // Setting base ensures all JS/CSS asset paths resolve correctly.
+  base: command === 'build' ? '/site/' : '/',
   css: {
     postcss: {
       plugins: [tailwindcss(), autoprefixer()],
@@ -18,6 +21,7 @@ export default defineConfig({
       '/policy': 'http://127.0.0.1:5000',
       '/reports': 'http://127.0.0.1:5000',
       '/scan': 'http://127.0.0.1:8000',
+      '/dashboard': 'http://127.0.0.1:8000',
       '/dashboard/summary': 'http://127.0.0.1:8000',
       '/dashboard/scans': 'http://127.0.0.1:8000',
       '/health': 'http://127.0.0.1:8000',
@@ -28,4 +32,4 @@ export default defineConfig({
       ignored: ['**/*.rartemp', '**/__rzi_*', '**/node.zip'],
     },
   },
-})
+}))
