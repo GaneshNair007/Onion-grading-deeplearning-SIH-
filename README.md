@@ -1,3 +1,15 @@
+---
+title: Onion Grading AI System SIH 2026
+emoji: 🧅
+colorFrom: green
+colorTo: yellow
+sdk: docker
+app_port: 8000
+pinned: true
+license: mit
+short_description: AI-powered onion quality grading using YOLOv8 and acoustic sensing
+---
+
 # ONION-Q — AI-Assisted Onion Quality Grading (SIH26031)
 
 ## What this is

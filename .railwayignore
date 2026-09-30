@@ -1,0 +1,68 @@
+# Python virtual environments - Railway installs from requirements.txt via Docker
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+
+# Node modules - Docker runs npm ci
+node_modules/
+
+# Training datasets - not needed at runtime
+dataset/
+dataset-acoustic/
+dataset-negatives/
+
+# Large binary / model training artifacts
+runs/
+outputs/
+checkpoints/
+*.pt
+!backend/model_backend/best.pt
+*.pth
+*.onnx
+*.h5
+*.tflite
+*.joblib
+models/vision/rejection_reference.npz
+
+# Local dev data
+local_data/
+.test-tmp*/
+.evaluation_scratch/
+.freebuff/
+
+# Build outputs (Docker rebuilds these)
+dist/
+build/
+
+# Generated reports (regenerated at runtime)
+reports/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+localhost.log
+localhost.error.log
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Git
+.git/
+
+# Large dataset archives
+*.zip
+*.tar.gz
+*.coco-segmentation/
+*.coco-mmdetection/
+
+# IDE
+.vscode/
+.idea/
