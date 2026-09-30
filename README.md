@@ -1,4 +1,4 @@
-# VOSHTOK — AI-Assisted Onion Quality Grading (SIH26031)
+# VOSTOK — AI-Assisted Onion Quality Grading (SIH26031)
 
 ## What this is
 
